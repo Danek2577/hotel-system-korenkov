@@ -167,25 +167,15 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
                     {/* User menu */}
                     <Dropdown placement="bottom-end">
                         <DropdownTrigger>
-                            <Button variant="light" className="gap-2">
-                                <Avatar
-                                    size="sm"
-                                    name={Auth.user?.name?.charAt(0) || 'U'}
-                                    className="bg-primary text-primary-foreground flex-shrink-0"
-                                />
-                                <div className="text-left hidden sm:block">
-                                    <p className="text-sm font-medium">{Auth.user?.name}</p>
-                                    <p className="text-xs text-default-500">
-                                        {Auth.user?.role === 'ADMIN' ? 'Администратор' : 'Менеджер'}
-                                    </p>
-                                </div>
+                            <Button color="primary" className="gap-2 px-4">
+                                {Auth.user?.name}
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </Button>
                         </DropdownTrigger>
-                        <DropdownMenu aria-label="Меню пользователя">
-                            <DropdownItem key="profile" className="h-14 gap-2" textValue="Профиль">
+                        <DropdownMenu aria-label="Меню пользователя" className="p-2 min-w-[200px]">
+                            <DropdownItem key="profile" className="h-16 gap-2 py-3 cursor-default opacity-100" isReadOnly textValue="Профиль">
                                 <p className="font-semibold">{Auth.user?.email}</p>
                                 <p className="text-sm text-default-500">
                                     {Auth.user?.role === 'ADMIN' ? 'Администратор' : 'Менеджер'}

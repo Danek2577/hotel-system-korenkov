@@ -49,7 +49,7 @@ const UserModel = sequelize.define('krs_users', {
         defaultValue: null
     }
 }, {
-    tableName: 'krs_users',
+    tableName: 'users',
     timestamps: false
 });
 

@@ -25,7 +25,6 @@ import { dateToUnix, unixToDate, formatPrice, calculateNights } from '../../../.
 interface BookingFormProps {
     isOpen: boolean;
     onClose: () => void;
-    onOpenChange: (isOpen: boolean) => void;
     editBooking?: BookingProps | null;
 }
 
@@ -38,7 +37,7 @@ interface FormData {
     status: 'CONFIRMED' | 'CANCELLED';
 }
 
-const BookingForm = ({ isOpen, onClose, onOpenChange, editBooking }: BookingFormProps) => {
+const BookingForm = ({ isOpen, onClose, editBooking }: BookingFormProps) => {
     const { mutate } = useSWRConfig();
     const { rooms } = useRoomsAdmGet({ limit: 100, status: 'AVAILABLE' });
     const isEdit = !!editBooking;
@@ -144,7 +143,7 @@ const BookingForm = ({ isOpen, onClose, onOpenChange, editBooking }: BookingForm
             await mutate((key) => Array.isArray(key) && key[0] === 'bookings');
             // Also invalidate rooms availability cache if possible, but rooms list might not need invalidation unless room status changed
             await mutate((key) => Array.isArray(key) && key[0] === 'rooms');
-            onOpenChange(false);
+            onClose();
         };
 
         try {
@@ -189,7 +188,7 @@ const BookingForm = ({ isOpen, onClose, onOpenChange, editBooking }: BookingForm
     return (
         <Modal
             isOpen={isOpen}
-            onOpenChange={onOpenChange}
+            onClose={onClose}
             size="lg"
             backdrop="opaque"
             placement="center"

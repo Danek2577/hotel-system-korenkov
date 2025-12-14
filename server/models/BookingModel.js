@@ -68,7 +68,7 @@ const BookingModel = sequelize.define('krs_bookings', {
         defaultValue: null
     }
 }, {
-    tableName: 'krs_bookings',
+    tableName: 'bookings',
     timestamps: false
 });
 

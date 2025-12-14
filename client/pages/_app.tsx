@@ -20,7 +20,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <NextUIProvider navigate={router.push}>
             <main className="dark text-foreground bg-background min-h-screen">
                 <Toaster
-                    position="top-right"
+                    position="bottom-center"
                     toastOptions={{
                         duration: 4000,
                         style: {

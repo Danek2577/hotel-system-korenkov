@@ -1,7 +1,7 @@
 const sequelize = require('../models');
-const {Op} = require('sequelize');
-const {BookingModel} = require('../models/BookingModel');
-const {RoomModel} = require('../models/RoomModel');
+const { Op } = require('sequelize');
+const { BookingModel } = require('../models/BookingModel');
+const { RoomModel } = require('../models/RoomModel');
 const roomService = require('./roomService');
 const httpError = require('../utils/httpError');
 
@@ -19,11 +19,11 @@ class BookingService {
      * @param {number} date_end - UNIX timestamp
      * @returns {Promise<number>} - Booking ID
      */
-    async admCreate({roomId, guest_name, guest_phone, date_start, date_end}) {
+    async admCreate({ roomId, guest_name, guest_phone, date_start, date_end }) {
         return await sequelize.transaction(async (transaction) => {
             // Check if room exists
             const room = await RoomModel.findOne({
-                where: {id: roomId, date_delete: null},
+                where: { id: roomId, date_delete: null },
                 attributes: ['id', 'price', 'status'],
                 transaction,
                 lock: transaction.LOCK.UPDATE
@@ -44,8 +44,8 @@ class BookingService {
                     room_id: roomId,
                     status: 'CONFIRMED',
                     date_delete: null,
-                    date_start: {[Op.lt]: date_end},
-                    date_end: {[Op.gt]: date_start}
+                    date_start: { [Op.lt]: date_end },
+                    date_end: { [Op.gt]: date_start }
                 },
                 transaction
             });
@@ -69,7 +69,7 @@ class BookingService {
                 total_price,
                 status: 'CONFIRMED',
                 date_add: unixNow
-            }, {transaction});
+            }, { transaction });
 
             return booking.id;
         });
@@ -84,10 +84,10 @@ class BookingService {
      * @param {number} [date_end]
      * @param {'CONFIRMED'|'CANCELLED'} [status]
      */
-    async admUpdate({bookingId, guest_name, guest_phone, date_start, date_end, status}) {
+    async admUpdate({ bookingId, guest_name, guest_phone, date_start, date_end, status }) {
         await sequelize.transaction(async (transaction) => {
             const booking = await BookingModel.findOne({
-                where: {id: bookingId, date_delete: null},
+                where: { id: bookingId, date_delete: null },
                 include: [{
                     association: 'room',
                     attributes: ['id', 'price']
@@ -110,9 +110,9 @@ class BookingService {
                         room_id: booking.room_id,
                         status: 'CONFIRMED',
                         date_delete: null,
-                        id: {[Op.ne]: bookingId},
-                        date_start: {[Op.lt]: newDateEnd},
-                        date_end: {[Op.gt]: newDateStart}
+                        id: { [Op.ne]: bookingId },
+                        date_start: { [Op.lt]: newDateEnd },
+                        date_end: { [Op.gt]: newDateStart }
                     },
                     transaction
                 });
@@ -132,7 +132,7 @@ class BookingService {
             if (date_end) booking.date_end = date_end;
             if (status) booking.status = status;
 
-            await booking.save({transaction});
+            await booking.save({ transaction });
         });
     }
 
@@ -158,32 +158,42 @@ class BookingService {
         offset = 0,
         limit = 20
     }) {
-        const where = {date_delete: null};
+        const where = { date_delete: null };
 
-        if (bookingId) where.id = bookingId;
-        if (roomId) where.room_id = roomId;
-        if (guest_name) where.guest_name = {[Op.substring]: guest_name};
+        // Defensive parsing to prevent NaN
+        const safeBookingId = bookingId ? parseInt(bookingId, 10) : null;
+        const safeRoomId = roomId ? parseInt(roomId, 10) : null;
+        const safeDateFrom = date_from ? parseInt(date_from, 10) : null;
+        const safeDateTo = date_to ? parseInt(date_to, 10) : null;
+        const safeOffset = parseInt(offset, 10) || 0;
+        const safeLimit = parseInt(limit, 10) || 20;
+
+        if (safeBookingId && !isNaN(safeBookingId)) where.id = safeBookingId;
+        if (safeRoomId && !isNaN(safeRoomId)) where.room_id = safeRoomId;
+        if (guest_name && typeof guest_name === 'string' && guest_name.trim()) {
+            where.guest_name = { [Op.substring]: guest_name };
+        }
         if (status) where.status = status;
-        if (date_from) where.date_start = {[Op.gte]: date_from};
-        if (date_to) {
+        if (safeDateFrom && !isNaN(safeDateFrom)) where.date_start = { [Op.gte]: safeDateFrom };
+        if (safeDateTo && !isNaN(safeDateTo)) {
             where.date_end = where.date_end
-                ? {...where.date_end, [Op.lte]: date_to}
-                : {[Op.lte]: date_to};
+                ? { ...where.date_end, [Op.lte]: safeDateTo }
+                : { [Op.lte]: safeDateTo };
         }
 
-        const {count, rows: bookings} = await BookingModel.findAndCountAll({
+        const { count, rows: bookings } = await BookingModel.findAndCountAll({
             where,
-            attributes: {exclude: ['date_delete']},
+            attributes: { exclude: ['date_delete'] },
             order: [['date_start', 'DESC']],
-            limit,
-            offset,
+            limit: safeLimit,
+            offset: safeOffset,
             include: [{
                 association: 'room',
                 attributes: ['id', 'name', 'category', 'price']
             }]
         });
 
-        return {count, bookings};
+        return { count, bookings };
     }
 
     /**
@@ -193,8 +203,8 @@ class BookingService {
      */
     async admGetOne(bookingId) {
         const booking = await BookingModel.findOne({
-            where: {id: bookingId, date_delete: null},
-            attributes: {exclude: ['date_delete']},
+            where: { id: bookingId, date_delete: null },
+            attributes: { exclude: ['date_delete'] },
             include: [{
                 association: 'room',
                 attributes: ['id', 'name', 'category', 'price', 'capacity']
@@ -214,7 +224,7 @@ class BookingService {
      */
     async admCancel(bookingId) {
         const booking = await BookingModel.findOne({
-            where: {id: bookingId, date_delete: null}
+            where: { id: bookingId, date_delete: null }
         });
 
         if (!booking) {
@@ -235,7 +245,7 @@ class BookingService {
      */
     async admDelete(bookingId) {
         const booking = await BookingModel.findOne({
-            where: {id: bookingId, date_delete: null}
+            where: { id: bookingId, date_delete: null }
         });
 
         if (!booking) {
@@ -254,14 +264,14 @@ class BookingService {
      * @param {number} dateEnd
      * @returns {Promise<{available: boolean, conflictingBookings: Array}>}
      */
-    async bookingAvailabilityGet({roomId, dateStart, dateEnd}) {
+    async bookingAvailabilityGet({ roomId, dateStart, dateEnd }) {
         const conflictingBookings = await BookingModel.findAll({
             where: {
                 room_id: roomId,
                 status: 'CONFIRMED',
                 date_delete: null,
-                date_start: {[Op.lt]: dateEnd},
-                date_end: {[Op.gt]: dateStart}
+                date_start: { [Op.lt]: dateEnd },
+                date_end: { [Op.gt]: dateStart }
             },
             attributes: ['id', 'guest_name', 'date_start', 'date_end']
         });

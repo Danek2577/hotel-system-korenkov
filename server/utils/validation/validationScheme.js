@@ -7,11 +7,11 @@ const validationUtility = require('./validationUtility');
  */
 class ValidationScheme {
     // ==================== AUTH ====================
-    
+
     authLogin = Joi.object().required().keys({
         email: validationUtility.email,
         password: validationUtility.password
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     authRegister = Joi.object().required().keys({
         email: validationUtility.email,
@@ -20,7 +20,7 @@ class ValidationScheme {
         role: Joi.string().valid('ADMIN', 'MANAGER').default('MANAGER').messages({
             'any.only': 'Роль должна быть ADMIN или MANAGER'
         })
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     // ==================== ROOMS ====================
 
@@ -41,7 +41,7 @@ class ValidationScheme {
         }),
         blocks: validationUtility.blocks,
         is_published: Joi.boolean().default(true)
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     roomUpdate = this.roomCreate.keys({
         roomId: validationUtility.id
@@ -49,16 +49,16 @@ class ValidationScheme {
 
     roomAdmGet = Joi.object().required().keys({
         roomId: validationUtility.idOptional,
-        name: Joi.string().max(100),
-        category: Joi.string().valid('STANDARD', 'LUXURY', 'SUITE'),
-        status: Joi.string().valid('AVAILABLE', 'BOOKED', 'MAINTENANCE'),
+        name: Joi.string().max(100).empty(''),
+        category: Joi.string().valid('STANDARD', 'LUXURY', 'SUITE').empty(''),
+        status: Joi.string().valid('AVAILABLE', 'BOOKED', 'MAINTENANCE').empty(''),
         offset: validationUtility.offset,
         limit: validationUtility.limit
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     roomAdmGetOne = Joi.object().required().keys({
         roomId: validationUtility.id
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     // ==================== BOOKINGS ====================
 
@@ -81,7 +81,7 @@ class ValidationScheme {
         date_end: validationUtility.unixTimestamp.messages({
             'any.required': 'Поле "Дата выезда" обязательно для заполнения'
         })
-    }).options({stripUnknown: true}).custom((value, helpers) => {
+    }).options({ stripUnknown: true }).custom((value, helpers) => {
         if (value.date_end <= value.date_start) {
             return helpers.error('custom.dateRange');
         }
@@ -104,7 +104,7 @@ class ValidationScheme {
         status: Joi.string().valid('CONFIRMED', 'CANCELLED').messages({
             'any.only': 'Статус должен быть CONFIRMED или CANCELLED'
         })
-    }).options({stripUnknown: true}).custom((value, helpers) => {
+    }).options({ stripUnknown: true }).custom((value, helpers) => {
         if (value.date_start && value.date_end && value.date_end <= value.date_start) {
             return helpers.error('custom.dateRange');
         }
@@ -116,27 +116,27 @@ class ValidationScheme {
     bookingAdmGet = Joi.object().required().keys({
         bookingId: validationUtility.idOptional,
         roomId: validationUtility.idOptional,
-        guest_name: Joi.string().max(200),
-        status: Joi.string().valid('CONFIRMED', 'CANCELLED'),
-        date_from: Joi.number().integer().positive(),
-        date_to: Joi.number().integer().positive(),
+        guest_name: Joi.string().max(200).empty(''),
+        status: Joi.string().valid('CONFIRMED', 'CANCELLED').empty(''),
+        date_from: Joi.number().integer().positive().empty(''),
+        date_to: Joi.number().integer().positive().empty(''),
         offset: validationUtility.offset,
         limit: validationUtility.limit
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     bookingAdmGetOne = Joi.object().required().keys({
         bookingId: validationUtility.id
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     bookingCancel = Joi.object().required().keys({
         bookingId: validationUtility.id
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 
     bookingAvailability = Joi.object().required().keys({
         roomId: validationUtility.id,
         dateStart: validationUtility.unixTimestamp,
         dateEnd: validationUtility.unixTimestamp
-    }).options({stripUnknown: true})
+    }).options({ stripUnknown: true })
 }
 
 module.exports = new ValidationScheme();

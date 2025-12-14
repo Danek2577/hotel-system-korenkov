@@ -49,7 +49,7 @@ const DashboardPage = observer(() => {
     const bookedRooms = rooms.filter(r => r.status === 'BOOKED').length;
     const maintenanceRooms = rooms.filter(r => r.status === 'MAINTENANCE').length;
     const occupancyRate = roomsCount > 0 ? Math.round((bookedRooms / roomsCount) * 100) : 0;
-    
+
     // Calculate total revenue
     const totalRevenue = bookings.reduce((sum, b) => sum + parseFloat(String(b.total_price || 0)), 0);
 
@@ -102,18 +102,19 @@ const DashboardPage = observer(() => {
         }]
     };
 
-    // Line chart data - Last 7 days (mock for demo)
+    // Line chart data - Last 7 days (based on real data when available)
     const last7Days = Array.from({ length: 7 }, (_, i) => {
         const date = new Date();
         date.setDate(date.getDate() - (6 - i));
         return date.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
     });
 
+    // Use actual check-ins for today, zeros for other days (real analytics would require more data)
     const lineChartData = {
         labels: last7Days,
         datasets: [{
             label: 'Заселения',
-            data: [3, 5, 4, 7, 6, 8, todayCheckIns || 2],
+            data: [0, 0, 0, 0, 0, 0, todayCheckIns],
             fill: true,
             borderColor: '#006FEE',
             backgroundColor: 'rgba(0, 111, 238, 0.1)',
@@ -279,10 +280,9 @@ const DashboardPage = observer(() => {
                                         key={room.id}
                                         className="aspect-square rounded-lg flex items-center justify-center text-white font-medium text-sm cursor-pointer transition-transform hover:scale-105"
                                         style={{ backgroundColor: STATUS_COLORS[room.status] }}
-                                        title={`${room.name} - ${
-                                            room.status === 'AVAILABLE' ? 'Свободен' :
-                                            room.status === 'BOOKED' ? 'Занят' : 'На обслуживании'
-                                        }`}
+                                        title={`${room.name} - ${room.status === 'AVAILABLE' ? 'Свободен' :
+                                                room.status === 'BOOKED' ? 'Занят' : 'На обслуживании'
+                                            }`}
                                     >
                                         {room.name.substring(0, 4)}
                                     </div>

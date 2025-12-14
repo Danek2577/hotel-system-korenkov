@@ -1,7 +1,7 @@
 const sequelize = require('../models');
-const {Op} = require('sequelize');
-const {RoomModel} = require('../models/RoomModel');
-const {BookingModel} = require('../models/BookingModel');
+const { Op } = require('sequelize');
+const { RoomModel } = require('../models/RoomModel');
+const { BookingModel } = require('../models/BookingModel');
 const httpError = require('../utils/httpError');
 
 /**
@@ -41,7 +41,7 @@ class RoomService {
                 blocks,
                 is_published,
                 date_add: unixNow
-            }, {transaction});
+            }, { transaction });
 
             return room.id;
         });
@@ -70,7 +70,7 @@ class RoomService {
     }) {
         await sequelize.transaction(async (transaction) => {
             const room = await RoomModel.findOne({
-                where: {id: roomId, date_delete: null},
+                where: { id: roomId, date_delete: null },
                 transaction,
                 lock: transaction.LOCK.UPDATE
             });
@@ -90,7 +90,7 @@ class RoomService {
             room.is_published = is_published;
             room.date_edit = unixNow;
 
-            await room.save({transaction});
+            await room.save({ transaction });
         });
     }
 
@@ -104,23 +104,28 @@ class RoomService {
      * @param {number} [limit]
      * @returns {Promise<{count: number, rooms: Array}>}
      */
-    async admGet({roomId, name, category, status, offset = 0, limit = 20}) {
-        const where = {date_delete: null};
+    async admGet({ roomId, name, category, status, offset = 0, limit = 20 }) {
+        const where = { date_delete: null };
 
-        if (roomId) where.id = roomId;
-        if (name) where.name = {[Op.substring]: name};
+        // Defensive parsing to prevent NaN
+        const safeRoomId = roomId ? parseInt(roomId, 10) : null;
+        const safeOffset = parseInt(offset, 10) || 0;
+        const safeLimit = parseInt(limit, 10) || 20;
+
+        if (safeRoomId && !isNaN(safeRoomId)) where.id = safeRoomId;
+        if (name && typeof name === 'string' && name.trim()) where.name = { [Op.substring]: name };
         if (category) where.category = category;
         if (status) where.status = status;
 
-        const {count, rows: rooms} = await RoomModel.findAndCountAll({
+        const { count, rows: rooms } = await RoomModel.findAndCountAll({
             where,
-            attributes: {exclude: ['date_delete']},
+            attributes: { exclude: ['date_delete'] },
             order: [['id', 'DESC']],
-            limit,
-            offset
+            limit: safeLimit,
+            offset: safeOffset
         });
 
-        return {count, rooms};
+        return { count, rooms };
     }
 
     /**
@@ -130,11 +135,11 @@ class RoomService {
      */
     async admGetOne(roomId) {
         const room = await RoomModel.findOne({
-            where: {id: roomId, date_delete: null},
-            attributes: {exclude: ['date_delete']},
+            where: { id: roomId, date_delete: null },
+            attributes: { exclude: ['date_delete'] },
             include: [{
                 association: 'bookings',
-                where: {date_delete: null, status: 'CONFIRMED'},
+                where: { date_delete: null, status: 'CONFIRMED' },
                 required: false,
                 attributes: ['id', 'guest_name', 'date_start', 'date_end', 'status']
             }]
@@ -154,7 +159,7 @@ class RoomService {
      * @param {'STANDARD'|'LUXURY'|'SUITE'} [category]
      * @returns {Promise<{count: number, rooms: Array}>}
      */
-    async roomPublicGet({offset = 0, limit = 20, category}) {
+    async roomPublicGet({ offset = 0, limit = 20, category }) {
         const where = {
             date_delete: null,
             is_published: true
@@ -162,7 +167,7 @@ class RoomService {
 
         if (category) where.category = category;
 
-        const {count, rows: rooms} = await RoomModel.findAndCountAll({
+        const { count, rows: rooms } = await RoomModel.findAndCountAll({
             where,
             attributes: ['id', 'name', 'category', 'price', 'capacity', 'status', 'blocks'],
             order: [['id', 'DESC']],
@@ -170,7 +175,7 @@ class RoomService {
             offset
         });
 
-        return {count, rooms};
+        return { count, rooms };
     }
 
     /**
@@ -180,7 +185,7 @@ class RoomService {
      */
     async roomPublicGetOne(roomId) {
         const room = await RoomModel.findOne({
-            where: {id: roomId, date_delete: null, is_published: true},
+            where: { id: roomId, date_delete: null, is_published: true },
             attributes: ['id', 'name', 'category', 'price', 'capacity', 'status', 'blocks']
         });
 
@@ -198,7 +203,7 @@ class RoomService {
     async admDelete(roomId) {
         await sequelize.transaction(async (transaction) => {
             const room = await RoomModel.findOne({
-                where: {id: roomId, date_delete: null},
+                where: { id: roomId, date_delete: null },
                 transaction,
                 lock: transaction.LOCK.UPDATE
             });
@@ -213,7 +218,7 @@ class RoomService {
                     room_id: roomId,
                     status: 'CONFIRMED',
                     date_delete: null,
-                    date_end: {[Op.gt]: Math.floor(Date.now() / 1000)}
+                    date_end: { [Op.gt]: Math.floor(Date.now() / 1000) }
                 },
                 transaction
             });
@@ -224,7 +229,7 @@ class RoomService {
 
             const unixNow = Math.floor(Date.now() / 1000);
             room.date_delete = unixNow;
-            await room.save({transaction});
+            await room.save({ transaction });
         });
     }
 
@@ -236,21 +241,21 @@ class RoomService {
      * @param {number} [excludeBookingId] - Exclude booking for updates
      * @returns {Promise<boolean>}
      */
-    async availabilityCheck({roomId, dateStart, dateEnd, excludeBookingId = null}) {
+    async availabilityCheck({ roomId, dateStart, dateEnd, excludeBookingId = null }) {
         const where = {
             room_id: roomId,
             status: 'CONFIRMED',
             date_delete: null,
             // Collision detection: (RequestStart < ExistingEnd) && (RequestEnd > ExistingStart)
-            date_start: {[Op.lt]: dateEnd},
-            date_end: {[Op.gt]: dateStart}
+            date_start: { [Op.lt]: dateEnd },
+            date_end: { [Op.gt]: dateStart }
         };
 
         if (excludeBookingId) {
-            where.id = {[Op.ne]: excludeBookingId};
+            where.id = { [Op.ne]: excludeBookingId };
         }
 
-        const conflictingBooking = await BookingModel.findOne({where});
+        const conflictingBooking = await BookingModel.findOne({ where });
 
         return !conflictingBooking;
     }

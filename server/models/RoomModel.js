@@ -73,7 +73,7 @@ const RoomModel = sequelize.define('krs_rooms', {
         defaultValue: null
     }
 }, {
-    tableName: 'krs_rooms',
+    tableName: 'rooms',
     timestamps: false
 });
 

@@ -1,103 +1,184 @@
-import React, { useEffect, useState } from 'react';
-import LkLayout from "../../../src/components/layout/LkLayout";
-import {
-    Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-    Button, useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, Spinner, Chip
-} from "@nextui-org/react";
-import { $authHost } from "../../../src/API";
+import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Button, Chip, Card, CardBody, Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@nextui-org/react';
+import toast from 'react-hot-toast';
+import MainLayout from "../../../src/components/layout/MainLayout";
+import TablePagination from "../../../src/components/module/adm/TablePagination";
 import RoomCreateForm from "../../../src/components/module/room/ui/RoomCreateForm";
+import { fetchRoomsAdmGet, fetchRoomAdmDelete, Room } from "../../../src/API/roomAPI";
+import {
+    ROOM_CATEGORY_LABELS,
+    ROOM_STATUS_LABELS,
+    ROOM_STATUS_COLORS
+} from "../../../src/components/module/room/domain/roomDomain";
 
-// Интерфейс прямо тут, чтобы не искать по файлам
-interface Room {
-    id: number;
-    name: string;
-    price: number;
-    capacity: number;
-    description?: string;
-}
+const RoomsPage = observer(() => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
 
-const RoomsPage = () => {
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [rooms, setRooms] = useState<Room[]>([]);
-    const [loading, setLoading] = useState(true);
+    const handleCreate = () => {
+        setSelectedRoom(null);
+        onOpen();
+    };
 
-    // Простая функция загрузки без SWR (для надежности отладки)
-    const fetchRooms = async () => {
+    const handleEdit = (room: Room) => {
+        setSelectedRoom(room);
+        onOpen();
+    };
+
+    const deleteToastId = 'room-delete-toast';
+
+    const handleDeleteConfirm = (room: Room) => {
+        toast((t) => (
+            <div className="flex flex-col gap-3">
+                <p className="font-medium">Удалить номер "{room.name}"?</p>
+                <div className="flex gap-2">
+                    <Button size="sm" variant="flat" onPress={() => toast.dismiss(t.id)}>
+                        Отмена
+                    </Button>
+                    <Button size="sm" color="danger" onPress={() => handleDelete(room.id)}>
+                        Удалить
+                    </Button>
+                </div>
+            </div>
+        ), { id: deleteToastId, duration: 10000 });
+    };
+
+    const handleDelete = async (roomId: number) => {
+        toast.loading('Удаление...', { id: deleteToastId });
         try {
-            setLoading(true);
-            const { data } = await $authHost.get('rooms/adm'); // Или 'rooms/my' в зависимости от твоего роута
-            // Бэк может вернуть массив сразу или объект { count: ..., rows: ... }
-            // Проверяем, что пришло
-            const items = Array.isArray(data) ? data : (data.rows || data.entities || []);
-            setRooms(items);
-        } catch (e) {
-            console.error("Ошибка загрузки номеров:", e);
-            alert("Не удалось загрузить номера. Чекни консоль.");
-        } finally {
-            setLoading(false);
+            await fetchRoomAdmDelete(roomId);
+            toast.success('Номер удалён', { id: deleteToastId });
+            setRefreshKey(prev => prev + 1);
+        } catch (e: any) {
+            toast.error(e?.response?.data?.message || 'Ошибка удаления', { id: deleteToastId });
         }
     };
 
-    useEffect(() => {
-        fetchRooms();
-    }, []);
+    const handleSuccess = () => {
+        onClose();
+        setRefreshKey(prev => prev + 1);
+    };
 
     return (
-        <LkLayout>
-            <div className="p-4">
-                <div className="flex justify-between items-center mb-5">
-                    <h1 className="text-2xl font-bold">Номера</h1>
-                    <Button color="primary" onPress={onOpen}>
-                        + Создать номер
-                    </Button>
+        <MainLayout>
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold">Управление номерами</h1>
+                    <p className="text-default-500 mt-1">
+                        Создавайте и управляйте номерным фондом
+                    </p>
                 </div>
 
-                {loading ? (
-                    <div className="flex justify-center"><Spinner size="lg" /></div>
-                ) : rooms.length === 0 ? (
-                    <div className="text-center text-gray-500 mt-10">Номеров нет. Создай первый!</div>
-                ) : (
-                    <Table aria-label="Таблица номеров">
-                        <TableHeader>
-                            <TableColumn>ID</TableColumn>
-                            <TableColumn>Название</TableColumn>
-                            <TableColumn>Цена</TableColumn>
-                            <TableColumn>Вместимость</TableColumn>
-                        </TableHeader>
-                        <TableBody>
-                            {rooms.map((room) => (
-                                <TableRow key={room.id}>
-                                    <TableCell>{room.id}</TableCell>
-                                    <TableCell className="font-bold">{room.name}</TableCell>
-                                    <TableCell>
-                                        <Chip color="success" variant="flat">{room.price} ₽</Chip>
-                                    </TableCell>
-                                    <TableCell>{room.capacity} чел.</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
+                <Card className="bg-content1">
+                    <CardBody className="p-0">
+                        <TablePagination
+                            key={refreshKey}
+                            request={fetchRoomsAdmGet}
+                            rowsName="rooms"
+                            inputs={[
+                                { name: 'name', label: 'Поиск...' },
+                                {
+                                    name: 'category',
+                                    label: 'Категория',
+                                    select: {
+                                        options: Object.entries(ROOM_CATEGORY_LABELS).map(([value, label]) => ({ value, label }))
+                                    }
+                                },
+                                {
+                                    name: 'status',
+                                    label: 'Статус',
+                                    select: {
+                                        options: Object.entries(ROOM_STATUS_LABELS).map(([value, label]) => ({ value, label }))
+                                    }
+                                }
+                            ]}
+                            table={[
+                                { header: '№', text: 'id' },
+                                { header: 'Название', text: 'name' },
+                                {
+                                    header: 'Категория',
+                                    custom: {
+                                        func: (row: Room) => ROOM_CATEGORY_LABELS[row.category] || row.category
+                                    }
+                                },
+                                { header: 'Цена/ночь', price: { valueName: 'price' } },
+                                { header: 'Мест', text: 'capacity' },
+                                {
+                                    header: 'Статус',
+                                    custom: {
+                                        func: (row: Room) => (
+                                            <Chip
+                                                size="sm"
+                                                color={ROOM_STATUS_COLORS[row.status] || 'default'}
+                                                variant="flat"
+                                            >
+                                                {ROOM_STATUS_LABELS[row.status] || row.status}
+                                            </Chip>
+                                        )
+                                    }
+                                },
+                                { header: 'Создан', timestamp: { valueName: 'date_add' } },
+                                {
+                                    header: 'Действия',
+                                    custom: {
+                                        func: (row: Room) => (
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="flat"
+                                                    color="primary"
+                                                    onPress={() => handleEdit(row)}
+                                                >
+                                                    Изменить
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="flat"
+                                                    color="danger"
+                                                    onPress={() => handleDeleteConfirm(row)}
+                                                >
+                                                    Удалить
+                                                </Button>
+                                            </div>
+                                        )
+                                    }
+                                }
+                            ]}
+                            leftContent={
+                                <Button color="primary" onPress={handleCreate}>
+                                    + Создать номер
+                                </Button>
+                            }
+                            isShowCount={false}
+                        />
+                    </CardBody>
+                </Card>
 
-                {/* Модалка вынесена наружу, чтобы не обрезалась */}
-                <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
+                <Modal
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    placement="center"
+                    size="xl"
+                >
                     <ModalContent>
-                        {(onClose) => (
-                            <>
-                                <ModalHeader>Новый номер</ModalHeader>
-                                <ModalBody>
-                                    <RoomCreateForm onSuccess={() => {
-                                        onClose();
-                                        fetchRooms(); // Обновляем таблицу после создания
-                                    }} />
-                                </ModalBody>
-                            </>
-                        )}
+                        <ModalHeader className="flex items-center gap-2">
+                            <span>🏨</span>
+                            <span>{selectedRoom ? 'Редактировать номер' : 'Создать номер'}</span>
+                        </ModalHeader>
+                        <ModalBody className="pb-6">
+                            <RoomCreateForm
+                                editRoom={selectedRoom}
+                                onSuccess={handleSuccess}
+                                onCancel={onClose}
+                            />
+                        </ModalBody>
                     </ModalContent>
                 </Modal>
             </div>
-        </LkLayout>
+        </MainLayout>
     );
-};
+});
 
 export default RoomsPage;

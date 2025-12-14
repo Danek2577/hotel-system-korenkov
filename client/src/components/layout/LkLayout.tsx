@@ -48,8 +48,8 @@ const LkLayout = observer(({ children }: LkLayoutProps) => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbar isBordered className="bg-white shadow-sm">
+        <div className="min-h-screen bg-background text-foreground">
+            <Navbar isBordered className="bg-content1">
                 <NavbarBrand>
                     <Link href="/lk" className="font-bold text-xl text-inherit">
                         🏨 Отель
@@ -80,7 +80,7 @@ const LkLayout = observer(({ children }: LkLayoutProps) => {
                         <DropdownMenu aria-label="Меню пользователя">
                             <DropdownItem key="profile" className="h-14 gap-2">
                                 <p className="font-semibold">{Auth.user?.email}</p>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-default-500">
                                     {Auth.user?.role === 'ADMIN' ? 'Администратор' : 'Менеджер'}
                                 </p>
                             </DropdownItem>
