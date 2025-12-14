@@ -6,32 +6,24 @@ import { fetchRoomsAdmGet, RoomsAdmGetParams, RoomsResponse } from '../../../../
 export const useRoomsAdmGetKeys = (params?: RoomsAdmGetParams) => ['rooms', 'adm', params];
 
 const useRoomsAdmGet = (params?: RoomsAdmGetParams) => {
-    // Use Auth.isAuth for conditional fetching - accessing it to make it reactive if observer is used, 
-    // but here we are in a hook. We should pass the auth state in the key or rely on SWR revalidating when key changes.
-    // AuthStore.hash changes on login/logout, so we use it to construct the key.
+    // Use Auth.isAuth for conditional fetching
     const isReady = Auth.isAuth && !Auth.isLoading;
-
-    // Include Auth.hash in the key to force revalidation when user logs in/out
-    const key = isReady ? [...useRoomsAdmGetKeys(params), Auth.hash] : null;
-
+    
     const hook = useSWR<RoomsResponse>(
-        key,
+        isReady ? useRoomsAdmGetKeys(params) : null,
         () => fetchRoomsAdmGet(params),
-        {
-            revalidateOnFocus: false,
-            keepPreviousData: true
-        }
+        { revalidateOnFocus: false }
     );
 
     const responseData = hook?.data;
-    // The API always returns { message: { count, rooms } } based on the interface
-    const data = responseData?.message;
+    // Support both { message: { ... } } and { ... } formats
+    const data = responseData?.message || responseData;
 
     return {
         ...hook,
-        data,
-        rooms: data?.rooms || [],
-        count: data?.count || 0
+        data: hook?.data?.message,
+        rooms: hook?.data?.message?.rooms || [],
+        count: hook?.data?.message?.count || 0
     };
 };
 

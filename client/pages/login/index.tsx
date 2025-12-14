@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { observer } from 'mobx-react-lite';
-import { Card, CardBody, CardHeader, Input, Button, Divider } from '@nextui-org/react';
+import { Card, CardBody, CardHeader, Input, Button, Divider, Link } from '@nextui-org/react';
 import toast from 'react-hot-toast';
 import Auth from '../../src/store/AuthStore';
 
@@ -20,28 +20,28 @@ const LoginPage = observer(() => {
 
     const validate = () => {
         const newErrors: { email?: string; password?: string } = {};
-        
+
         if (!email.trim()) {
             newErrors.email = 'Email обязателен';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             newErrors.email = 'Введите корректный email';
         }
-        
+
         if (!password.trim()) {
             newErrors.password = 'Пароль обязателен';
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!validate()) return;
 
         setIsLoading(true);
-        
+
         try {
             await Auth.login({ email, password });
             toast.success('Добро пожаловать!');
@@ -61,12 +61,12 @@ const LoginPage = observer(() => {
     return (
         <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
             {/* Background with blur effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20" />
-            <div className="absolute inset-0 backdrop-blur-3xl" />
-            
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20 pointer-events-none" />
+            <div className="absolute inset-0 backdrop-blur-3xl pointer-events-none" />
+
             {/* Decorative elements */}
-            <div className="absolute top-20 left-20 w-72 h-72 bg-primary/30 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl" />
+            <div className="absolute top-20 left-20 w-72 h-72 bg-primary/30 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-20 right-20 w-96 h-96 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
             {/* Login Card */}
             <Card className="w-full max-w-md mx-4 relative z-10 bg-content1/80 backdrop-blur-xl border border-divider">
@@ -132,9 +132,15 @@ const LoginPage = observer(() => {
                         </Button>
                     </form>
 
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center space-y-2">
                         <p className="text-xs text-default-400">
                             Тестовые данные: test123@test.com / Test123!
+                        </p>
+                        <p className="text-sm text-default-500">
+                            Нет аккаунта?{' '}
+                            <Link href="/registration" size="sm" color="primary">
+                                Зарегистрироваться
+                            </Link>
                         </p>
                     </div>
                 </CardBody>

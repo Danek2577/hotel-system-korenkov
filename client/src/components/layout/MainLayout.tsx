@@ -11,10 +11,8 @@ import {
     Spinner,
     Avatar,
     Tooltip,
-    // useDisclosure
 } from '@nextui-org/react';
 import Auth from '../../store/AuthStore';
-// import AboutAuthorModal from '../modals/AboutAuthorModal';
 
 interface MainLayoutProps {
     children: ReactNode;
@@ -22,9 +20,9 @@ interface MainLayoutProps {
 
 // Navigation items
 const navItems = [
-    { 
+    {
         key: 'dashboard',
-        label: 'Дашборд', 
+        label: 'Дашборд',
         href: '/lk',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,9 +30,9 @@ const navItems = [
             </svg>
         )
     },
-    { 
+    {
         key: 'rooms',
-        label: 'Номера', 
+        label: 'Номера',
         href: '/lk/rooms',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,9 +40,9 @@ const navItems = [
             </svg>
         )
     },
-    { 
+    {
         key: 'bookings',
-        label: 'Бронирования', 
+        label: 'Бронирования',
         href: '/lk/bookings',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +54,6 @@ const navItems = [
 
 const MainLayout = observer(({ children }: MainLayoutProps) => {
     const router = useRouter();
-    // const { isOpen, onOpen, onClose } = useDisclosure();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     if (Auth.isLoading) {
@@ -87,7 +84,7 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
     return (
         <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
             {/* Sidebar */}
-            <aside 
+            <aside
                 className={`h-full bg-content1 border-r border-divider transition-all duration-300 flex-shrink-0
                     ${sidebarCollapsed ? 'w-20' : 'w-64'}`}
             >
@@ -114,9 +111,9 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
                 {/* Navigation */}
                 <nav className="p-4 space-y-2">
                     {navItems.map((item) => (
-                        <Tooltip 
+                        <Tooltip
                             key={item.key}
-                            content={item.label} 
+                            content={item.label}
                             placement="right"
                             isDisabled={!sidebarCollapsed}
                         >
@@ -136,8 +133,8 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
 
                 {/* Bottom section */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-divider">
-                    <Tooltip 
-                        content="Об авторе" 
+                    <Tooltip
+                        content="Об авторе"
                         placement="right"
                         isDisabled={!sidebarCollapsed}
                     >
@@ -194,8 +191,8 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
                                     {Auth.user?.role === 'ADMIN' ? 'Администратор' : 'Менеджер'}
                                 </p>
                             </DropdownItem>
-                            <DropdownItem 
-                                key="about" 
+                            <DropdownItem
+                                key="about"
                                 as={Link}
                                 href="/about"
                                 startContent={
@@ -228,8 +225,6 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
                 </main>
             </div>
 
-            {/* About Author Modal - removed as we use page now */}
-            {/* <AboutAuthorModal isOpen={isOpen} onClose={onClose} /> */}
         </div>
     );
 });

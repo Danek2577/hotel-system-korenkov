@@ -12,7 +12,7 @@ class ValidationUtility {
         'any.required': 'Поле "ID" обязательно для заполнения'
     })
 
-    idOptional = Joi.number().integer().positive().messages({
+    idOptional = Joi.number().integer().positive().empty('').messages({
         'number.base': 'Поле "ID" должно быть числом',
         'number.integer': 'Поле "ID" должно быть целым числом',
         'number.positive': 'Поле "ID" должно быть положительным числом'
@@ -72,14 +72,14 @@ class ValidationUtility {
         'any.required': 'Поле "Дата" обязательно для заполнения'
     })
 
-    // Pagination
-    offset = Joi.number().integer().min(0).default(0).messages({
+    // Pagination - handle empty strings from query params
+    offset = Joi.number().integer().min(0).default(0).empty('').messages({
         'number.base': 'Offset должен быть числом',
         'number.integer': 'Offset должен быть целым числом',
         'number.min': 'Offset не может быть отрицательным'
     })
 
-    limit = Joi.number().integer().positive().max(100).default(20).messages({
+    limit = Joi.number().integer().positive().max(100).default(20).empty('').messages({
         'number.base': 'Limit должен быть числом',
         'number.integer': 'Limit должен быть целым числом',
         'number.positive': 'Limit должен быть положительным числом',

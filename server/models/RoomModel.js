@@ -1,5 +1,5 @@
 const sequelize = require('./index');
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
 
 /**
  * @typedef {Object} Room
@@ -19,7 +19,7 @@ const {DataTypes} = require('sequelize');
 /**
  * @type {import('sequelize').Model<Room, Room>}
  */
-const RoomModel = sequelize.define('rooms', {
+const RoomModel = sequelize.define('krs_rooms', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -73,7 +73,8 @@ const RoomModel = sequelize.define('rooms', {
         defaultValue: null
     }
 }, {
-    tableName: 'rooms'
+    tableName: 'krs_rooms',
+    timestamps: false
 });
 
-module.exports = {RoomModel};
+module.exports = { RoomModel };

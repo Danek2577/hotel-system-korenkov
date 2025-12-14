@@ -1,5 +1,5 @@
 const sequelize = require('./index');
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
 
 /**
  * @typedef {Object} User
@@ -15,7 +15,7 @@ const {DataTypes} = require('sequelize');
 /**
  * @type {import('sequelize').Model<User, User>}
  */
-const UserModel = sequelize.define('users', {
+const UserModel = sequelize.define('krs_users', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -49,7 +49,8 @@ const UserModel = sequelize.define('users', {
         defaultValue: null
     }
 }, {
-    tableName: 'users'
+    tableName: 'krs_users',
+    timestamps: false
 });
 
-module.exports = {UserModel};
+module.exports = { UserModel };

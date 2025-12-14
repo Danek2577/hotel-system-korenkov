@@ -8,28 +8,22 @@ export const useBookingsAdmGetKeys = (params?: BookingsAdmGetParams) => ['bookin
 const useBookingsAdmGet = (params?: BookingsAdmGetParams) => {
     // Use Auth.isAuth for conditional fetching
     const isReady = Auth.isAuth && !Auth.isLoading;
-
-    // Include Auth.hash in the key to force revalidation when user logs in/out
-    const key = isReady ? [...useBookingsAdmGetKeys(params), Auth.hash] : null;
-
+    
     const hook = useSWR<BookingsResponse>(
-        key,
+        isReady ? useBookingsAdmGetKeys(params) : null,
         () => fetchBookingsAdmGet(params),
-        {
-            revalidateOnFocus: false,
-            keepPreviousData: true
-        }
+        { revalidateOnFocus: false }
     );
 
     const responseData = hook?.data;
-    // The API always returns { message: { count, bookings } } based on the interface
-    const data = responseData?.message;
+    // Support both { message: { ... } } and { ... } formats
+    const data = responseData?.message || responseData;
 
     return {
         ...hook,
-        data,
-        bookings: data?.bookings || [],
-        count: data?.count || 0
+        data: hook?.data?.message,
+        bookings: hook?.data?.message?.bookings || [],
+        count: hook?.data?.message?.count || 0
     };
 };
 

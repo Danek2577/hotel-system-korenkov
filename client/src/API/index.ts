@@ -1,41 +1,28 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = process.env.APP_API_URL || 'http://localhost:5000/api';
+// Хардкод URL для надежности (чтобы не гадать с env)
+const BASE_URL = "http://localhost:5000/api/";
 
-// Public API instance
-export const $host = axios.create({
-    baseURL: API_URL,
+const $host = axios.create({
+    baseURL: BASE_URL
 });
 
-// Authorized API instance
-export const $authHost = axios.create({
-    baseURL: API_URL,
+const $authHost = axios.create({
+    baseURL: BASE_URL
 });
 
-// Request interceptor - add token
+// Самый простой интерцептор: есть токен в localStorage? Суй его в хедер.
 $authHost.interceptors.request.use((config) => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') { // Проверка на браузер
         const token = localStorage.getItem('token');
         if (token) {
-            config.headers = config.headers || {};
             config.headers.authorization = `Bearer ${token}`;
         }
     }
     return config;
 });
 
-// Response interceptor - handle 401 errors
-$authHost.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            if (typeof window !== 'undefined') {
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-            }
-        }
-        return Promise.reject(error);
-    }
-);
-
-export { API_URL };
+export {
+    $host,
+    $authHost
+}

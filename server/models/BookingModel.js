@@ -1,6 +1,6 @@
 const sequelize = require('./index');
-const {DataTypes} = require('sequelize');
-const {RoomModel} = require('./RoomModel');
+const { DataTypes } = require('sequelize');
+const { RoomModel } = require('./RoomModel');
 
 /**
  * @typedef {Object} Booking
@@ -19,7 +19,7 @@ const {RoomModel} = require('./RoomModel');
 /**
  * @type {import('sequelize').Model<Booking, Booking>}
  */
-const BookingModel = sequelize.define('bookings', {
+const BookingModel = sequelize.define('krs_bookings', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -68,11 +68,12 @@ const BookingModel = sequelize.define('bookings', {
         defaultValue: null
     }
 }, {
-    tableName: 'bookings'
+    tableName: 'krs_bookings',
+    timestamps: false
 });
 
 // Associations
-RoomModel.hasMany(BookingModel, {foreignKey: 'room_id', as: 'bookings'});
-BookingModel.belongsTo(RoomModel, {foreignKey: 'room_id', as: 'room'});
+RoomModel.hasMany(BookingModel, { foreignKey: 'room_id', as: 'bookings' });
+BookingModel.belongsTo(RoomModel, { foreignKey: 'room_id', as: 'room' });
 
-module.exports = {BookingModel};
+module.exports = { BookingModel };
