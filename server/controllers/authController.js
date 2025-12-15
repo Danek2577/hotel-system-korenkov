@@ -49,8 +49,8 @@ class AuthController {
      */
     async admGet(req, res, next) {
         try {
-            const { offset, limit } = req.query;
-            const result = await userService.admGet({ offset, limit });
+            const data = await validationScheme.authAdmGet.validateAsync(req.query);
+            const result = await userService.admGet(data);
             next(result);
         } catch (e) {
             next(e);

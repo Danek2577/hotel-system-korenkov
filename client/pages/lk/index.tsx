@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../../src/components/layout/MainLayout";
 import { Card, CardBody, Spinner } from "@nextui-org/react";
-import { fetchAdmDashboardStatsGet } from "../../src/API/privateAPI";
+import { fetchAdmDashboardStatsGet } from "@/API/privateAPI";
 
 export default function Dashboard() {
     // Состояние для хранения статистики

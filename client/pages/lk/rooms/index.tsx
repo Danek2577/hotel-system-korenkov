@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { Button, Chip, Card, CardBody } from '@nextui-org/react';
 import toast from 'react-hot-toast';
 import MainLayout from "../../../src/components/layout/MainLayout";
-import TablePagination from "../../../src/components/module/adm/TablePagination";
+import TablePagination, { TRequestParams } from "../../../src/components/module/adm/TablePagination";
 import { fetchRoomsAdmGet, fetchRoomAdmDelete, Room } from "../../../src/API/privateAPI";
 import {
     ROOM_CATEGORY_LABELS,
@@ -53,9 +53,9 @@ const RoomsPage = observer(() => {
         }
     };
 
-    const fetchRoomsWithSort = async (params: any) => {
+    const fetchRoomsWithSort = async (params: TRequestParams & { sortFilter?: string }) => {
         const { sortFilter, ...rest } = params;
-        const newParams: any = { ...rest };
+        const newParams: TRequestParams = { ...rest };
 
         if (sortFilter === 'price_asc') {
             newParams.sort_by = 'price';

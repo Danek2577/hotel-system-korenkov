@@ -1,6 +1,6 @@
 import React from 'react';
 import MainLayout from "../../src/components/layout/MainLayout";
-import { Card, CardBody, CardHeader, Divider, Link } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
 
 const AboutPage = () => {
     return (

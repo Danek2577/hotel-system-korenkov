@@ -1,15 +1,13 @@
 import { useEffect } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
-import { Chip } from '@nextui-org/react';
+import { useFormContext } from 'react-hook-form';
 import {
     BOOKING_STATUS_OPTIONS,
-    BOOKING_STATUS_LABELS,
-    BookingProps
+    BOOKING_STATUS_LABELS
 } from '../domain/bookingDomain';
 import { ROOM_CATEGORY_LABELS } from '../../room/domain/roomDomain';
 import useRoomsAdmGet from '../../room/hook/useRoomsAdmGet';
-import { fetchBookingAvailabilityGet, Booking, Room } from '../../../../API/privateAPI';
-import { dateToUnix, formatPrice, calculateNights } from '../../../../utils/dateUtils';
+import { fetchBookingAvailabilityGet, Room } from '../../../../API/privateAPI';
+import { dateToUnix, formatPrice } from '../../../../utils/dateUtils';
 import UIFormBlock from '../../../../components/ui/form/UIFormBlock';
 import InputControl from '../../../../components/ui/form/InputControl';
 import SelectControl from '../../../../components/ui/form/SelectControl';
@@ -17,7 +15,7 @@ import SelectControl from '../../../../components/ui/form/SelectControl';
 // === Field Components ===
 
 export function BookingFormFieldRoom({ excludeBookingId }: { excludeBookingId?: number }) {
-    const { control, setValue, watch, formState: { errors }, setError, clearErrors } = useFormContext();
+    const { watch, setError, clearErrors } = useFormContext();
 
     // Watch fields for automatic calculation
     const dateStart = watch('date_start');
@@ -25,30 +23,6 @@ export function BookingFormFieldRoom({ excludeBookingId }: { excludeBookingId?: 
     const selectedRoomId = watch('room_id');
 
     const { rooms, isLoading: isRoomsLoading } = useRoomsAdmGet({ limit: 100 });
-
-    // Effect: Calculate price when dates or room changes
-    useEffect(() => {
-        if (dateStart && dateEnd && selectedRoomId) {
-            const startInput = new Date(dateStart);
-            const endInput = new Date(dateEnd);
-
-            // Convert to unix for API if strings
-            const startUnix = typeof dateStart === 'string' ? dateToUnix(new Date(dateStart)) : dateStart;
-            const endUnix = typeof dateEnd === 'string' ? dateToUnix(new Date(dateEnd)) : dateEnd;
-
-            const room = rooms.find((r: Room) => r.id === Number(selectedRoomId));
-
-            if (room && startUnix && endUnix) {
-                const nights = calculateNights(startUnix, endUnix);
-                // Only set price if it works out positive
-                if (nights > 0) {
-                    // We don't have a total_price field in CREATE params typically on client side logic unless we want to show it?
-                    // Actually API handles price usually, but let's assume we want to show estimated price or sth.
-                    // For now, let's just check availability.
-                }
-            }
-        }
-    }, [dateStart, dateEnd, selectedRoomId, rooms]);
 
     // Availability Check Effect
     useEffect(() => {
@@ -63,7 +37,8 @@ export function BookingFormFieldRoom({ excludeBookingId }: { excludeBookingId?: 
                     const result = await fetchBookingAvailabilityGet({
                         roomId: Number(selectedRoomId),
                         dateStart: startUnix,
-                        dateEnd: endUnix
+                        dateEnd: endUnix,
+                        excludeBookingId
                     });
 
                     if (!result.message.available) {

@@ -8,16 +8,12 @@ export const useBookingsAdmGetKeys = (params?: BookingsAdmGetParams) => ['bookin
 const useBookingsAdmGet = (params?: BookingsAdmGetParams) => {
     // Use Auth.isAuth for conditional fetching
     const isReady = Auth.isAuth && !Auth.isLoading;
-    
+
     const hook = useSWR<BookingsResponse>(
         isReady ? useBookingsAdmGetKeys(params) : null,
         () => fetchBookingsAdmGet(params || {}),
         { revalidateOnFocus: false }
     );
-
-    const responseData = hook?.data;
-    // Support both { message: { ... } } and { ... } formats
-    const data = responseData?.message || responseData;
 
     return {
         ...hook,

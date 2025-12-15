@@ -39,12 +39,10 @@ class RoomController {
      */
     async admGet(req, res, next) {
         try {
-            console.log('RoomController.admGet query:', req.query);
             const data = await validationScheme.roomAdmGet.validateAsync(req.query);
             const result = await roomService.admGet(data);
             next(result);
         } catch (e) {
-            console.error('RoomController.admGet error:', e);
             next(e);
         }
     }

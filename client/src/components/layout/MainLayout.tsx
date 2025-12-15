@@ -9,7 +9,6 @@ import {
     DropdownMenu,
     DropdownItem,
     Spinner,
-    Avatar,
     Tooltip,
 } from '@nextui-org/react';
 import Auth from '../../store/AuthStore';

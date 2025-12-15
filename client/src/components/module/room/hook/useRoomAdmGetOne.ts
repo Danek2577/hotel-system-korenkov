@@ -5,10 +5,10 @@ import { fetchRoomAdmGetOne, RoomResponse } from '../../../../API/privateAPI';
 // SWR key for cache invalidation
 export const useRoomAdmGetOneKeys = (roomId: number) => ['rooms', 'adm', roomId];
 
-const useRoomAdmGetOne = (roomId: number | null) => {
+const useRoomAdmGetOne = (roomId: number) => {
     const hook = useSWR<RoomResponse>(
-        Auth.hash && roomId ? useRoomAdmGetOneKeys(roomId) : null,
-        () => fetchRoomAdmGetOne({ roomId: roomId! })
+        Auth.hash ? useRoomAdmGetOneKeys(roomId) : null,
+        () => fetchRoomAdmGetOne({ roomId })
     );
 
     return {

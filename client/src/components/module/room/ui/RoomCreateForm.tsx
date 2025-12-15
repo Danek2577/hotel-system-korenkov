@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { Button, Divider } from '@nextui-org/react';
 import { RoomFormMain, RoomFormPricing } from './RoomFormBlocks';
 import { roomAdmCreate } from '../data/roomData';
-import { RoomCreateParams } from '../../../../API/roomAPI';
+import { RoomCreateParams } from '../../../../API/privateAPI';
 
 interface RoomCreateFormProps {
     onSuccess?: () => void;
@@ -25,24 +25,32 @@ function RoomCreateForm({ onSuccess, onCancel }: RoomCreateFormProps) {
     });
 
     const onSubmit = form.handleSubmit(async (data) => {
-        await roomAdmCreate({
-            data,
-            onSuccess: async () => {
-                if (onSuccess) {
-                    onSuccess();
-                } else {
-                    await router.push('/lk/rooms');
+        try {
+            await roomAdmCreate({
+                data,
+                onSuccess: async () => {
+                    if (onSuccess) {
+                        onSuccess();
+                        return;
+                    }
+
+                    router.push('/lk/rooms');
                 }
-            }
-        });
+            });
+        } catch (error) {
+            // TODO: обработать ошибку (toast / setError и т.п.)
+            // eslint-disable-next-line no-console
+            console.error('roomAdmCreate error', error);
+        }
     });
 
     const handleCancel = () => {
         if (onCancel) {
             onCancel();
-        } else {
-            router.back();
+            return;
         }
+
+        router.back();
     };
 
     const components = [

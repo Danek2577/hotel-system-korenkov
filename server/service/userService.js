@@ -129,16 +129,16 @@ class UserService {
      * @param {number} [limit]
      * @returns {Promise<{count: number, users: Array}>}
      */
-    async admGet({offset = 0, limit = 20}) {
-        const {count, rows: users} = await UserModel.findAndCountAll({
-            where: {date_delete: null},
-            attributes: {exclude: ['password_hash', 'date_delete']},
+    async admGet({ offset = 0, limit = 20 }) {
+        const { count, rows: users } = await UserModel.findAndCountAll({
+            where: { date_delete: null },
+            attributes: { exclude: ['password_hash', 'date_delete'] },
             order: [['id', 'DESC']],
             limit,
             offset
         });
 
-        return {count, users};
+        return { count, users };
     }
 }
 

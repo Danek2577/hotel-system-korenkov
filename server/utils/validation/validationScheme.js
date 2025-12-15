@@ -118,10 +118,18 @@ class ValidationScheme {
     bookingAdmGet = Joi.object().required().keys({
         bookingId: validationUtility.idOptional,
         roomId: validationUtility.idOptional,
+        guest_name: Joi.string().max(200).empty(''),
         status: Joi.string().valid('CONFIRMED', 'CANCELLED').empty(''),
         date_from: Joi.number().integer().positive().empty(''),
         date_to: Joi.number().integer().positive().empty(''),
         active_at: Joi.number().integer().positive().empty(''),
+        offset: validationUtility.offset,
+        limit: validationUtility.limit
+    }).options({ stripUnknown: true })
+
+    // ==================== USERS (ADMIN) ====================
+
+    authAdmGet = Joi.object().required().keys({
         offset: validationUtility.offset,
         limit: validationUtility.limit
     }).options({ stripUnknown: true })

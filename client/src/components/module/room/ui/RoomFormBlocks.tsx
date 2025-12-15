@@ -1,4 +1,3 @@
-import { Divider } from '@nextui-org/react';
 import {
     ROOM_CATEGORY_OPTIONS,
     ROOM_CATEGORY_LABELS,

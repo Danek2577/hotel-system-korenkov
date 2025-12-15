@@ -20,13 +20,27 @@ interface BookingEditFormProps {
     onCancel?: () => void;
 }
 
+type BookingEditFormValues = {
+    bookingId: number;
+    room_id: number;
+    guest_name: string;
+    guest_phone: string;
+    date_start: string;
+    date_end: string;
+    status: BookingUpdateProps['status'];
+};
+
 function BookingEditForm({ bookingId, onSuccess, onCancel }: BookingEditFormProps) {
     const router = useRouter();
     const { booking, isLoading, mutate } = useBookingAdmGetOne({ id: bookingId });
 
-    const form = useForm<BookingUpdateProps>();
+    const form = useForm<BookingEditFormValues>();
 
-    const { handleSubmit, reset, formState: { isSubmitting, defaultValues } } = form;
+    const {
+        handleSubmit,
+        reset,
+        formState: { isSubmitting }
+    } = form;
 
     // Fill form with booking data
     useEffect(() => {
@@ -39,7 +53,7 @@ function BookingEditForm({ bookingId, onSuccess, onCancel }: BookingEditFormProp
             date_start: unixToDateInput(booking.date_start),
             date_end: unixToDateInput(booking.date_end),
             status: booking.status
-        } as any);
+        });
     }, [booking, reset]);
 
     const onSubmit = handleSubmit(async (data) => {
@@ -49,32 +63,41 @@ function BookingEditForm({ bookingId, onSuccess, onCancel }: BookingEditFormProp
             guest_name: data.guest_name,
             guest_phone: data.guest_phone,
             status: data.status,
-            date_start: typeof data.date_start === 'string' ? dateToUnix(new Date(data.date_start)) : data.date_start,
-            date_end: typeof data.date_end === 'string' ? dateToUnix(new Date(data.date_end)) : data.date_end,
+            date_start: dateToUnix(new Date(data.date_start)),
+            date_end: dateToUnix(new Date(data.date_end))
         };
 
-        await bookingAdmUpdate({
-            data: formattedData,
-            onSuccess: async () => {
-                await mutate();
-                if (onSuccess) {
-                    onSuccess();
-                } else {
-                    await router.push('/lk/bookings');
+        try {
+            await bookingAdmUpdate({
+                data: formattedData,
+                onSuccess: async () => {
+                    await mutate();
+
+                    if (onSuccess) {
+                        onSuccess();
+                        return;
+                    }
+
+                    router.push('/lk/bookings');
                 }
-            }
-        });
+            });
+        } catch (error) {
+            // TODO: обработать ошибку (toast / setError и т.п.)
+            // eslint-disable-next-line no-console
+            console.error('bookingAdmUpdate error', error);
+        }
     });
 
     const handleCancel = () => {
         if (onCancel) {
             onCancel();
-        } else {
-            router.back();
+            return;
         }
+
+        router.back();
     };
 
-    if (isLoading || !defaultValues) {
+    if (isLoading || !booking) {
         return <Skeleton className="h-32 rounded-lg mt-6" />;
     }
 

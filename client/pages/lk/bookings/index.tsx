@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { Button, Chip, Card, CardBody } from '@nextui-org/react';
 import toast from 'react-hot-toast';
 import MainLayout from "../../../src/components/layout/MainLayout";
-import TablePagination from "../../../src/components/module/adm/TablePagination";
+import TablePagination, { TRequestParams } from "../../../src/components/module/adm/TablePagination";
 import {
     fetchBookingsAdmGet,
     fetchBookingAdmCancel,
@@ -72,11 +72,15 @@ const BookingsPage = observer(() => {
         }
     };
 
-    const fetchBookingsWithFilter = async (params: any) => {
+    const fetchBookingsWithFilter = async (params: TRequestParams & { dateFilter?: string }) => {
         const { dateFilter, ...rest } = params;
 
         const now = Math.floor(Date.now() / 1000);
-        const newParams: any = { ...rest };
+        const newParams: TRequestParams & {
+            date_from?: number;
+            date_to?: number;
+            active_at?: number;
+        } = { ...rest };
 
         if (dateFilter === 'upcoming') {
             newParams.date_from = now;

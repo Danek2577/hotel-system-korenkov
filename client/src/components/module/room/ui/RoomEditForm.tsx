@@ -20,13 +20,16 @@ function RoomEditForm({ roomId, onSuccess, onCancel }: RoomEditFormProps) {
 
     const form = useForm<RoomUpdateParams>();
 
-    const { handleSubmit, reset, formState: { isSubmitting, defaultValues } } = form;
+    const {
+        handleSubmit,
+        reset,
+        formState: { isSubmitting }
+    } = form;
 
     // Fill form with room data
     useEffect(() => {
         if (!room) return;
         reset({
-            roomId: room.id,
             name: room.name,
             category: room.category,
             price: room.price,
@@ -36,28 +39,37 @@ function RoomEditForm({ roomId, onSuccess, onCancel }: RoomEditFormProps) {
     }, [room, reset]);
 
     const onSubmit = handleSubmit(async (data) => {
-        await roomAdmUpdate({
-            data: { ...data, roomId },
-            onSuccess: async () => {
-                await mutate();
-                if (onSuccess) {
-                    onSuccess();
-                } else {
-                    await router.push('/lk/rooms');
+        try {
+            await roomAdmUpdate({
+                data: { ...data, roomId },
+                onSuccess: async () => {
+                    await mutate();
+
+                    if (onSuccess) {
+                        onSuccess();
+                        return;
+                    }
+
+                    router.push('/lk/rooms');
                 }
-            }
-        });
+            });
+        } catch (error) {
+            // TODO: обработать ошибку (toast / setError и т.п.)
+            // eslint-disable-next-line no-console
+            console.error('roomAdmUpdate error', error);
+        }
     });
 
     const handleCancel = () => {
         if (onCancel) {
             onCancel();
-        } else {
-            router.back();
+            return;
         }
+
+        router.back();
     };
 
-    if (isLoading || !defaultValues) {
+    if (isLoading || !room) {
         return <Skeleton className="h-32 rounded-lg mt-6" />;
     }
 

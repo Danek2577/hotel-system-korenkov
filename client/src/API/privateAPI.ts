@@ -37,6 +37,8 @@ export interface RoomsAdmGetParams {
     status?: 'AVAILABLE' | 'BOOKED' | 'MAINTENANCE';
     offset?: number;
     limit?: number;
+    sort_by?: 'price' | 'name' | 'id';
+    order?: 'ASC' | 'DESC';
 }
 
 export interface RoomsResponse {
@@ -88,6 +90,7 @@ export interface BookingsAdmGetParams {
     status?: 'CONFIRMED' | 'CANCELLED';
     date_from?: number;
     date_to?: number;
+    active_at?: number;
     offset?: number;
     limit?: number;
 }
@@ -182,9 +185,18 @@ export const fetchRoomPublicGetOne = async ({ roomId }: { roomId: number }) => {
 };
 
 // Admin endpoints
-export const fetchRoomsAdmGet = async ({ roomId, name, category, status, offset, limit }: RoomsAdmGetParams = {}) => {
+export const fetchRoomsAdmGet = async ({
+    roomId,
+    name,
+    category,
+    status,
+    offset,
+    limit,
+    sort_by,
+    order
+}: RoomsAdmGetParams = {}) => {
     const { data } = await $authHost.get('/rooms/adm/list', {
-        params: { roomId, name, category, status, offset, limit }
+        params: { roomId, name, category, status, offset, limit, sort_by, order }
     });
     return data;
 };
@@ -224,9 +236,19 @@ export const fetchBookingAvailabilityGet = async ({ roomId, dateStart, dateEnd, 
 };
 
 // Admin endpoints
-export const fetchBookingsAdmGet = async ({ bookingId, roomId, guest_name, status, date_from, date_to, offset, limit }: BookingsAdmGetParams = {}) => {
+export const fetchBookingsAdmGet = async ({
+    bookingId,
+    roomId,
+    guest_name,
+    status,
+    date_from,
+    date_to,
+    active_at,
+    offset,
+    limit
+}: BookingsAdmGetParams = {}) => {
     const { data } = await $authHost.get('/bookings/adm', {
-        params: { bookingId, roomId, guest_name, status, date_from, date_to, offset, limit }
+        params: { bookingId, roomId, guest_name, status, date_from, date_to, active_at, offset, limit }
     });
     return data;
 };

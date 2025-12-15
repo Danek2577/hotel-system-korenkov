@@ -8,16 +8,12 @@ export const useRoomsAdmGetKeys = (params?: RoomsAdmGetParams) => ['rooms', 'adm
 const useRoomsAdmGet = (params?: RoomsAdmGetParams) => {
     // Use Auth.isAuth for conditional fetching
     const isReady = Auth.isAuth && !Auth.isLoading;
-    
+
     const hook = useSWR<RoomsResponse>(
         isReady ? useRoomsAdmGetKeys(params) : null,
         () => fetchRoomsAdmGet(params || {}),
         { revalidateOnFocus: false }
     );
-
-    const responseData = hook?.data;
-    // Support both { message: { ... } } and { ... } formats
-    const data = responseData?.message || responseData;
 
     return {
         ...hook,

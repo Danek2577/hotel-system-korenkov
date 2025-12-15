@@ -17,30 +17,45 @@ interface BookingCreateFormProps {
     onCancel?: () => void;
 }
 
+type BookingCreateFormValues = {
+    room_id: number;
+    guest_name: string;
+    guest_phone: string;
+    date_start: string;
+    date_end: string;
+};
+
 function BookingCreateForm({ onSuccess, onCancel }: BookingCreateFormProps) {
     const router = useRouter();
 
-    const form = useForm<BookingCreateProps>();
+    const form = useForm<BookingCreateFormValues>();
 
     const onSubmit = form.handleSubmit(async (data) => {
         // Convert dates to unix for API
-        const formattedData = {
+        const formattedData: BookingCreateProps = {
             ...data,
             date_start: dateToUnix(new Date(String(data.date_start))),
             date_end: dateToUnix(new Date(String(data.date_end))),
             roomId: Number(data.room_id)
         };
 
-        await bookingAdmCreate({
-            data: formattedData,
-            onSuccess: async () => {
-                if (onSuccess) {
-                    onSuccess();
-                } else {
-                    await router.push('/lk/bookings');
+        try {
+            await bookingAdmCreate({
+                data: formattedData,
+                onSuccess: async () => {
+                    if (onSuccess) {
+                        onSuccess();
+                        return;
+                    }
+
+                    router.push('/lk/bookings');
                 }
-            }
-        });
+            });
+        } catch (error) {
+            // TODO: обработать ошибку (toast / setError и т.п.)
+            // eslint-disable-next-line no-console
+            console.error('bookingAdmCreate error', error);
+        }
     });
 
     const handleCancel = () => {
