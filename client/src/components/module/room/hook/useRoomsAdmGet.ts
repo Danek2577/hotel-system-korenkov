@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import Auth from '../../../../store/AuthStore';
-import { fetchRoomsAdmGet, RoomsAdmGetParams, RoomsResponse } from '../../../../API/roomAPI';
+import { fetchRoomsAdmGet, RoomsAdmGetParams, RoomsResponse } from '../../../../API/privateAPI';
 
 // SWR key for cache invalidation
 export const useRoomsAdmGetKeys = (params?: RoomsAdmGetParams) => ['rooms', 'adm', params];
@@ -11,7 +11,7 @@ const useRoomsAdmGet = (params?: RoomsAdmGetParams) => {
     
     const hook = useSWR<RoomsResponse>(
         isReady ? useRoomsAdmGetKeys(params) : null,
-        () => fetchRoomsAdmGet(params),
+        () => fetchRoomsAdmGet(params || {}),
         { revalidateOnFocus: false }
     );
 

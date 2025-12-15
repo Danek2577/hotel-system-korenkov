@@ -155,6 +155,7 @@ class BookingService {
         status,
         date_from,
         date_to,
+        active_at,
         offset = 0,
         limit = 20
     }) {
@@ -165,6 +166,7 @@ class BookingService {
         const safeRoomId = roomId ? parseInt(roomId, 10) : null;
         const safeDateFrom = date_from ? parseInt(date_from, 10) : null;
         const safeDateTo = date_to ? parseInt(date_to, 10) : null;
+        const safeActiveAt = active_at ? parseInt(active_at, 10) : null;
         const safeOffset = parseInt(offset, 10) || 0;
         const safeLimit = parseInt(limit, 10) || 20;
 
@@ -174,17 +176,25 @@ class BookingService {
             where.guest_name = { [Op.substring]: guest_name };
         }
         if (status) where.status = status;
-        if (safeDateFrom && !isNaN(safeDateFrom)) where.date_start = { [Op.gte]: safeDateFrom };
-        if (safeDateTo && !isNaN(safeDateTo)) {
-            where.date_end = where.date_end
-                ? { ...where.date_end, [Op.lte]: safeDateTo }
-                : { [Op.lte]: safeDateTo };
+
+        // Date filters
+        if (safeActiveAt && !isNaN(safeActiveAt)) {
+            // Active: Start <= Now AND End >= Now
+            where.date_start = { [Op.lte]: safeActiveAt };
+            where.date_end = { [Op.gte]: safeActiveAt };
+        } else {
+            if (safeDateFrom && !isNaN(safeDateFrom)) where.date_start = { [Op.gte]: safeDateFrom };
+            if (safeDateTo && !isNaN(safeDateTo)) {
+                where.date_end = where.date_end
+                    ? { ...where.date_end, [Op.lte]: safeDateTo }
+                    : { [Op.lte]: safeDateTo };
+            }
         }
 
         const { count, rows: bookings } = await BookingModel.findAndCountAll({
             where,
             attributes: { exclude: ['date_delete'] },
-            order: [['date_start', 'DESC']],
+            order: [['id', 'DESC']],
             limit: safeLimit,
             offset: safeOffset,
             include: [{
@@ -264,15 +274,21 @@ class BookingService {
      * @param {number} dateEnd
      * @returns {Promise<{available: boolean, conflictingBookings: Array}>}
      */
-    async bookingAvailabilityGet({ roomId, dateStart, dateEnd }) {
+    async bookingAvailabilityGet({ roomId, dateStart, dateEnd, excludeBookingId }) {
+        const where = {
+            room_id: roomId,
+            status: 'CONFIRMED',
+            date_delete: null,
+            date_start: { [Op.lt]: dateEnd },
+            date_end: { [Op.gt]: dateStart }
+        };
+
+        if (excludeBookingId) {
+            where.id = { [Op.ne]: excludeBookingId };
+        }
+
         const conflictingBookings = await BookingModel.findAll({
-            where: {
-                room_id: roomId,
-                status: 'CONFIRMED',
-                date_delete: null,
-                date_start: { [Op.lt]: dateEnd },
-                date_end: { [Op.gt]: dateStart }
-            },
+            where,
             attributes: ['id', 'guest_name', 'date_start', 'date_end']
         });
 

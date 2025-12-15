@@ -1,16 +1,16 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { observer } from 'mobx-react-lite';
-import { Button, Chip, Card, CardBody, useDisclosure } from '@nextui-org/react';
+import { Button, Chip, Card, CardBody } from '@nextui-org/react';
 import toast from 'react-hot-toast';
 import MainLayout from "../../../src/components/layout/MainLayout";
 import TablePagination from "../../../src/components/module/adm/TablePagination";
-import BookingForm from "../../../src/components/module/booking/ui/BookingForm";
 import {
     fetchBookingsAdmGet,
     fetchBookingAdmCancel,
     fetchBookingAdmUpdate,
     Booking
-} from "../../../src/API/bookingAPI";
+} from "../../../src/API/privateAPI";
 import {
     BOOKING_STATUS_LABELS,
     BOOKING_STATUS_COLORS
@@ -18,18 +18,15 @@ import {
 import { formatDate, formatPrice } from "../../../src/utils/dateUtils";
 
 const BookingsPage = observer(() => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const router = useRouter();
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleCreate = () => {
-        setSelectedBooking(null);
-        onOpen();
+        router.push('/lk/bookings/create');
     };
 
     const handleEdit = (booking: Booking) => {
-        setSelectedBooking(booking as any);
-        onOpen();
+        router.push(`/lk/bookings/${booking.id}`);
     };
 
     const handleCancel = async (booking: Booking) => {
@@ -48,7 +45,7 @@ const BookingsPage = observer(() => {
                         onPress={async () => {
                             toast.loading('Отмена...', { id: toastId });
                             try {
-                                await fetchBookingAdmCancel(booking.id);
+                                await fetchBookingAdmCancel({ bookingId: booking.id });
                                 toast.success('Бронирование отменено', { id: toastId });
                                 setRefreshKey(prev => prev + 1);
                             } catch (e: any) {
@@ -75,29 +72,57 @@ const BookingsPage = observer(() => {
         }
     };
 
-    const handleSuccess = () => {
-        onClose();
-        setRefreshKey(prev => prev + 1);
+    const fetchBookingsWithFilter = async (params: any) => {
+        const { dateFilter, ...rest } = params;
+
+        const now = Math.floor(Date.now() / 1000);
+        const newParams: any = { ...rest };
+
+        if (dateFilter === 'upcoming') {
+            newParams.date_from = now;
+        } else if (dateFilter === 'past') {
+            newParams.date_to = now;
+        } else if (dateFilter === 'active') {
+            newParams.active_at = now;
+        }
+
+        return fetchBookingsAdmGet(newParams);
     };
 
     return (
         <MainLayout>
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold">Управление бронированиями</h1>
-                    <p className="text-default-500 mt-1">
-                        Создавайте и управляйте бронированиями номеров
-                    </p>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-2xl font-bold">Управление бронированиями</h1>
+                        <p className="text-default-500 mt-1">
+                            Создавайте и управляйте бронированиями номеров
+                        </p>
+                    </div>
+                    <Button color="primary" onPress={handleCreate}>
+                        + Создать бронирование
+                    </Button>
                 </div>
 
                 <Card className="bg-content1">
                     <CardBody className="p-0">
                         <TablePagination
                             key={refreshKey}
-                            request={fetchBookingsAdmGet}
+                            request={fetchBookingsWithFilter}
                             rowsName="bookings"
                             inputs={[
                                 { name: 'guest_name', label: 'Поиск гостя...' },
+                                {
+                                    name: 'dateFilter',
+                                    label: 'Период',
+                                    select: {
+                                        options: [
+                                            { value: 'active', label: 'Актуальные' },
+                                            { value: 'upcoming', label: 'Предстоящие' },
+                                            { value: 'past', label: 'Прошедшие' }
+                                        ]
+                                    }
+                                },
                                 {
                                     name: 'status',
                                     label: 'Статус',
@@ -107,7 +132,7 @@ const BookingsPage = observer(() => {
                                 }
                             ]}
                             table={[
-                                { header: '№', text: 'id' },
+                                { header: '№', text: 'id', align: 'center' },
                                 {
                                     header: 'Номер',
                                     custom: {
@@ -142,6 +167,7 @@ const BookingsPage = observer(() => {
                                 },
                                 {
                                     header: 'Статус',
+                                    align: 'center',
                                     custom: {
                                         func: (row: Booking) => (
                                             <Chip
@@ -156,9 +182,10 @@ const BookingsPage = observer(() => {
                                 },
                                 {
                                     header: 'Действия',
+                                    align: 'end',
                                     custom: {
                                         func: (row: Booking) => (
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 justify-end">
                                                 <Button
                                                     size="sm"
                                                     variant="flat"
@@ -192,21 +219,10 @@ const BookingsPage = observer(() => {
                                     }
                                 }
                             ]}
-                            leftContent={
-                                <Button color="primary" onPress={handleCreate}>
-                                    + Создать бронирование
-                                </Button>
-                            }
                             isShowCount={false}
                         />
                     </CardBody>
                 </Card>
-
-                <BookingForm
-                    isOpen={isOpen}
-                    onClose={handleSuccess}
-                    editBooking={selectedBooking as any}
-                />
             </div>
         </MainLayout>
     );

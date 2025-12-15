@@ -17,7 +17,7 @@ import {
 import { useSWRConfig } from 'swr';
 import { bookingAdmCreate, bookingAdmUpdate } from '../data/bookingData';
 import { BookingProps, BOOKING_STATUS_LABELS } from '../domain/bookingDomain';
-import { fetchBookingAvailabilityGet } from '../../../../API/bookingAPI';
+import { fetchBookingAvailabilityGet } from '../../../../API/privateAPI';
 import useRoomsAdmGet from '../../room/hook/useRoomsAdmGet';
 import { ROOM_CATEGORY_LABELS } from '../../room/domain/roomDomain';
 import { dateToUnix, unixToDate, formatPrice, calculateNights } from '../../../../utils/dateUtils';
@@ -102,15 +102,11 @@ const BookingForm = ({ isOpen, onClose, editBooking }: BookingFormProps) => {
                         const { message } = await fetchBookingAvailabilityGet({
                             roomId: parseInt(watchRoomId),
                             dateStart,
-                            dateEnd
+                            dateEnd,
+                            excludeBookingId: isEdit ? editBooking?.id : undefined
                         });
 
-                        if (isEdit && message.conflictingBookings.length === 1) {
-                            const conflict = message.conflictingBookings[0];
-                            setAvailability(conflict.id === editBooking?.id);
-                        } else {
-                            setAvailability(message.available);
-                        }
+                        setAvailability(message.available);
 
                         const selectedRoom = rooms.find(r => r.id === parseInt(watchRoomId));
                         if (selectedRoom) {
@@ -185,21 +181,16 @@ const BookingForm = ({ isOpen, onClose, editBooking }: BookingFormProps) => {
         index === self.findIndex(r => r.id === room.id)
     );
 
+    if (!isOpen) return null;
+
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            size="lg"
-            backdrop="opaque"
+            onOpenChange={(open) => !open && onClose()}
             placement="center"
-            scrollBehavior="inside"
-            classNames={{
-                backdrop: "bg-black/80",
-                base: "bg-content1 border border-divider shadow-xl",
-                header: "border-b border-divider py-4",
-                body: "py-6",
-                footer: "border-t border-divider py-4",
-            }}
+            size="xl"
+            classNames={{ wrapper: 'z-[99999] h-dvh' }}
         >
             <ModalContent>
                 {(onModalClose) => (

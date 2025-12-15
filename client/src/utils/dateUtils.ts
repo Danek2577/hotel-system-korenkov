@@ -13,6 +13,14 @@ export const unixToDate = (unix: number): Date => {
 };
 
 /**
+ * Convert Unix timestamp to HTML date input format (YYYY-MM-DD)
+ */
+export const unixToDateInput = (unix: number): string => {
+    const date = unixToDate(unix);
+    return date.toISOString().split('T')[0];
+};
+
+/**
  * Format Unix timestamp to Russian date string
  */
 export const formatDate = (unix: number): string => {

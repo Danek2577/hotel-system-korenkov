@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import Auth from '../../../../store/AuthStore';
-import { fetchBookingsAdmGet, BookingsAdmGetParams, BookingsResponse } from '../../../../API/bookingAPI';
+import { fetchBookingsAdmGet, BookingsAdmGetParams, BookingsResponse } from '../../../../API/privateAPI';
 
 // SWR key for cache invalidation
 export const useBookingsAdmGetKeys = (params?: BookingsAdmGetParams) => ['bookings', 'adm', params];
@@ -11,7 +11,7 @@ const useBookingsAdmGet = (params?: BookingsAdmGetParams) => {
     
     const hook = useSWR<BookingsResponse>(
         isReady ? useBookingsAdmGetKeys(params) : null,
-        () => fetchBookingsAdmGet(params),
+        () => fetchBookingsAdmGet(params || {}),
         { revalidateOnFocus: false }
     );
 

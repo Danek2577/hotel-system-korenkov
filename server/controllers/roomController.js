@@ -12,7 +12,7 @@ class RoomController {
         try {
             const data = await validationScheme.roomCreate.validateAsync(req.body);
             const roomId = await roomService.admCreate(data);
-            next({id: roomId});
+            next({ id: roomId });
         } catch (e) {
             next(e);
         }
@@ -39,10 +39,12 @@ class RoomController {
      */
     async admGet(req, res, next) {
         try {
+            console.log('RoomController.admGet query:', req.query);
             const data = await validationScheme.roomAdmGet.validateAsync(req.query);
             const result = await roomService.admGet(data);
             next(result);
         } catch (e) {
+            console.error('RoomController.admGet error:', e);
             next(e);
         }
     }
@@ -52,7 +54,7 @@ class RoomController {
      */
     async admGetOne(req, res, next) {
         try {
-            const {roomId} = await validationScheme.roomAdmGetOne.validateAsync({
+            const { roomId } = await validationScheme.roomAdmGetOne.validateAsync({
                 roomId: parseInt(req.params.roomId)
             });
             const room = await roomService.admGetOne(roomId);
@@ -67,7 +69,7 @@ class RoomController {
      */
     async admDelete(req, res, next) {
         try {
-            const {roomId} = await validationScheme.roomAdmGetOne.validateAsync({
+            const { roomId } = await validationScheme.roomAdmGetOne.validateAsync({
                 roomId: parseInt(req.params.roomId)
             });
             await roomService.admDelete(roomId);
@@ -82,7 +84,7 @@ class RoomController {
      */
     async roomPublicGet(req, res, next) {
         try {
-            const {offset, limit, category} = req.query;
+            const { offset, limit, category } = req.query;
             const result = await roomService.roomPublicGet({
                 offset: parseInt(offset) || 0,
                 limit: parseInt(limit) || 20,

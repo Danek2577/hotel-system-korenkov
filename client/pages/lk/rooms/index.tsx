@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { observer } from 'mobx-react-lite';
-import { Button, Chip, Card, CardBody, Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@nextui-org/react';
+import { Button, Chip, Card, CardBody } from '@nextui-org/react';
 import toast from 'react-hot-toast';
 import MainLayout from "../../../src/components/layout/MainLayout";
 import TablePagination from "../../../src/components/module/adm/TablePagination";
-import RoomCreateForm from "../../../src/components/module/room/ui/RoomCreateForm";
-import { fetchRoomsAdmGet, fetchRoomAdmDelete, Room } from "../../../src/API/roomAPI";
+import { fetchRoomsAdmGet, fetchRoomAdmDelete, Room } from "../../../src/API/privateAPI";
 import {
     ROOM_CATEGORY_LABELS,
     ROOM_STATUS_LABELS,
@@ -13,18 +13,15 @@ import {
 } from "../../../src/components/module/room/domain/roomDomain";
 
 const RoomsPage = observer(() => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+    const router = useRouter();
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleCreate = () => {
-        setSelectedRoom(null);
-        onOpen();
+        router.push('/lk/rooms/create');
     };
 
     const handleEdit = (room: Room) => {
-        setSelectedRoom(room);
-        onOpen();
+        router.push(`/lk/rooms/${room.id}`);
     };
 
     const deleteToastId = 'room-delete-toast';
@@ -48,7 +45,7 @@ const RoomsPage = observer(() => {
     const handleDelete = async (roomId: number) => {
         toast.loading('Удаление...', { id: deleteToastId });
         try {
-            await fetchRoomAdmDelete(roomId);
+            await fetchRoomAdmDelete({ roomId });
             toast.success('Номер удалён', { id: deleteToastId });
             setRefreshKey(prev => prev + 1);
         } catch (e: any) {
@@ -56,29 +53,54 @@ const RoomsPage = observer(() => {
         }
     };
 
-    const handleSuccess = () => {
-        onClose();
-        setRefreshKey(prev => prev + 1);
+    const fetchRoomsWithSort = async (params: any) => {
+        const { sortFilter, ...rest } = params;
+        const newParams: any = { ...rest };
+
+        if (sortFilter === 'price_asc') {
+            newParams.sort_by = 'price';
+            newParams.order = 'ASC';
+        } else if (sortFilter === 'price_desc') {
+            newParams.sort_by = 'price';
+            newParams.order = 'DESC';
+        }
+
+        return fetchRoomsAdmGet(newParams);
     };
 
     return (
         <MainLayout>
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-2xl font-bold">Управление номерами</h1>
-                    <p className="text-default-500 mt-1">
-                        Создавайте и управляйте номерным фондом
-                    </p>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-2xl font-bold">Управление номерами</h1>
+                        <p className="text-default-500 mt-1">
+                            Создавайте и управляйте номерным фондом
+                        </p>
+                    </div>
+                    <Button color="primary" onPress={handleCreate}>
+                        + Создать номер
+                    </Button>
                 </div>
 
                 <Card className="bg-content1">
                     <CardBody className="p-0">
                         <TablePagination
                             key={refreshKey}
-                            request={fetchRoomsAdmGet}
+                            request={fetchRoomsWithSort}
                             rowsName="rooms"
                             inputs={[
                                 { name: 'name', label: 'Поиск...' },
+                                {
+                                    name: 'sortFilter',
+                                    label: 'Сортировка',
+                                    select: {
+                                        options: [
+                                            { value: 'price_asc', label: 'Сначала дешевые' },
+                                            { value: 'price_desc', label: 'Сначала дорогие' }
+                                        ]
+                                    }
+                                },
                                 {
                                     name: 'category',
                                     label: 'Категория',
@@ -95,8 +117,8 @@ const RoomsPage = observer(() => {
                                 }
                             ]}
                             table={[
-                                { header: '№', text: 'id' },
-                                { header: 'Название', text: 'name' },
+                                { header: '№', text: 'id', align: 'center' },
+                                { header: 'Название', text: 'name', align: 'start' },
                                 {
                                     header: 'Категория',
                                     custom: {
@@ -104,9 +126,10 @@ const RoomsPage = observer(() => {
                                     }
                                 },
                                 { header: 'Цена/ночь', price: { valueName: 'price' } },
-                                { header: 'Мест', text: 'capacity' },
+                                { header: 'Мест', text: 'capacity', align: 'center' },
                                 {
                                     header: 'Статус',
+                                    align: 'center',
                                     custom: {
                                         func: (row: Room) => (
                                             <Chip
@@ -122,9 +145,10 @@ const RoomsPage = observer(() => {
                                 { header: 'Создан', timestamp: { valueName: 'date_add' } },
                                 {
                                     header: 'Действия',
+                                    align: 'end',
                                     custom: {
                                         func: (row: Room) => (
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 justify-end">
                                                 <Button
                                                     size="sm"
                                                     variant="flat"
@@ -146,36 +170,10 @@ const RoomsPage = observer(() => {
                                     }
                                 }
                             ]}
-                            leftContent={
-                                <Button color="primary" onPress={handleCreate}>
-                                    + Создать номер
-                                </Button>
-                            }
                             isShowCount={false}
                         />
                     </CardBody>
                 </Card>
-
-                <Modal
-                    isOpen={isOpen}
-                    onClose={onClose}
-                    placement="center"
-                    size="xl"
-                >
-                    <ModalContent>
-                        <ModalHeader className="flex items-center gap-2">
-                            <span>🏨</span>
-                            <span>{selectedRoom ? 'Редактировать номер' : 'Создать номер'}</span>
-                        </ModalHeader>
-                        <ModalBody className="pb-6">
-                            <RoomCreateForm
-                                editRoom={selectedRoom}
-                                onSuccess={handleSuccess}
-                                onCancel={onClose}
-                            />
-                        </ModalBody>
-                    </ModalContent>
-                </Modal>
             </div>
         </MainLayout>
     );

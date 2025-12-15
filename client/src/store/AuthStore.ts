@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { fetchAuthCheck, fetchAuthLogin, fetchAuthRegister, LoginParams, RegisterParams } from '../API/authAPI';
+import { fetchAuthCheck, fetchAuthLogin, fetchAuthRegister, LoginParams, RegisterParams } from '../API/privateAPI';
 
 interface User {
     id: number;

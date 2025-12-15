@@ -104,13 +104,22 @@ class RoomService {
      * @param {number} [limit]
      * @returns {Promise<{count: number, rooms: Array}>}
      */
-    async admGet({ roomId, name, category, status, offset = 0, limit = 20 }) {
+    async admGet({ roomId, name, category, status, offset = 0, limit = 20, sort_by = 'id', order = 'DESC' }) {
         const where = { date_delete: null };
 
         // Defensive parsing to prevent NaN
         const safeRoomId = roomId ? parseInt(roomId, 10) : null;
-        const safeOffset = parseInt(offset, 10) || 0;
-        const safeLimit = parseInt(limit, 10) || 20;
+        // Strict fallback: if NaN, default to 0/20.
+        let safeOffset = parseInt(offset, 10);
+        if (isNaN(safeOffset)) safeOffset = 0;
+
+        let safeLimit = parseInt(limit, 10);
+        if (isNaN(safeLimit)) safeLimit = 20;
+
+        // Strict sorting validation
+        const ALLOWED_SORT = ['price', 'name', 'id'];
+        const safeSortBy = ALLOWED_SORT.includes(sort_by) ? sort_by : 'id';
+        const safeOrder = ['ASC', 'DESC'].includes(order) ? order : 'DESC';
 
         if (safeRoomId && !isNaN(safeRoomId)) where.id = safeRoomId;
         if (name && typeof name === 'string' && name.trim()) where.name = { [Op.substring]: name };
@@ -120,7 +129,7 @@ class RoomService {
         const { count, rows: rooms } = await RoomModel.findAndCountAll({
             where,
             attributes: { exclude: ['date_delete'] },
-            order: [['id', 'DESC']],
+            order: [[safeSortBy, safeOrder]],
             limit: safeLimit,
             offset: safeOffset
         });

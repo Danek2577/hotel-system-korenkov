@@ -44,6 +44,9 @@ export interface BookingsAdmGetParams {
     limit?: number;
 }
 
+// Status options for selects
+export const BOOKING_STATUS_OPTIONS: BookingProps['status'][] = ['CONFIRMED', 'CANCELLED'];
+
 // Status labels in Russian
 export const BOOKING_STATUS_LABELS: Record<BookingProps['status'], string> = {
     CONFIRMED: 'Подтверждено',

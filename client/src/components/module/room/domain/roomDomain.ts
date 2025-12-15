@@ -34,6 +34,12 @@ export interface RoomsAdmGetParams {
     limit?: number;
 }
 
+// Category options for selects
+export const ROOM_CATEGORY_OPTIONS: RoomProps['category'][] = ['STANDARD', 'LUXURY', 'SUITE'];
+
+// Status options for selects
+export const ROOM_STATUS_OPTIONS: RoomProps['status'][] = ['AVAILABLE', 'BOOKED', 'MAINTENANCE'];
+
 // Category labels in Russian
 export const ROOM_CATEGORY_LABELS: Record<RoomProps['category'], string> = {
     STANDARD: 'Стандарт',

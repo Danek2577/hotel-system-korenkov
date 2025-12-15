@@ -36,9 +36,22 @@ class AuthController {
      */
     async check(req, res, next) {
         try {
-            const {userId} = req.body;
-            const user = await userService.authCheck({userId});
+            const { userId } = req.body;
+            const user = await userService.authCheck({ userId });
             next(user);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    /**
+     * Get all users (Admin)
+     */
+    async admGet(req, res, next) {
+        try {
+            const { offset, limit } = req.query;
+            const result = await userService.admGet({ offset, limit });
+            next(result);
         } catch (e) {
             next(e);
         }

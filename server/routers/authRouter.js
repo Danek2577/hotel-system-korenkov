@@ -10,5 +10,6 @@ router.post('/login', authController.login, endHandler);
 
 // Authorized endpoints
 router.get('/check', authJwt(), authController.check, endHandler);
+router.get('/users', authJwt(['ADMIN']), authController.admGet, endHandler);
 
 module.exports = router;

@@ -24,6 +24,7 @@ import useDebounce from "../../../hooks/useDebounce";
 // Column Types
 type TableColumnBase = {
     header: string;
+    align?: 'start' | 'center' | 'end';
 };
 
 type TableColumnText = TableColumnBase & {
@@ -290,6 +291,9 @@ function TablePagination<T extends object>({
                             );
                         })}
 
+                    </div>
+
+                    <div className="flex items-center gap-2">
                         {/* Clear filters button */}
                         {Object.values(inputsValue).some(v => v !== '' && v !== false) && (
                             <Button
@@ -308,9 +312,8 @@ function TablePagination<T extends object>({
                                 </svg>
                             </Button>
                         )}
+                        {leftContent}
                     </div>
-
-                    {leftContent}
                 </div>
             )}
 
@@ -333,7 +336,7 @@ function TablePagination<T extends object>({
             >
                 <TableHeader>
                     {table.map((col, idx) => (
-                        <TableColumn key={idx}>{col.header}</TableColumn>
+                        <TableColumn key={idx} align={col.align || "start"}>{col.header}</TableColumn>
                     ))}
                 </TableHeader>
                 <TableBody

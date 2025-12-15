@@ -53,7 +53,9 @@ class ValidationScheme {
         category: Joi.string().valid('STANDARD', 'LUXURY', 'SUITE').empty(''),
         status: Joi.string().valid('AVAILABLE', 'BOOKED', 'MAINTENANCE').empty(''),
         offset: validationUtility.offset,
-        limit: validationUtility.limit
+        limit: validationUtility.limit,
+        sort_by: Joi.string().valid('price', 'name', 'id').empty(''),
+        order: Joi.string().valid('ASC', 'DESC').empty('')
     }).options({ stripUnknown: true })
 
     roomAdmGetOne = Joi.object().required().keys({
@@ -116,10 +118,10 @@ class ValidationScheme {
     bookingAdmGet = Joi.object().required().keys({
         bookingId: validationUtility.idOptional,
         roomId: validationUtility.idOptional,
-        guest_name: Joi.string().max(200).empty(''),
         status: Joi.string().valid('CONFIRMED', 'CANCELLED').empty(''),
         date_from: Joi.number().integer().positive().empty(''),
         date_to: Joi.number().integer().positive().empty(''),
+        active_at: Joi.number().integer().positive().empty(''),
         offset: validationUtility.offset,
         limit: validationUtility.limit
     }).options({ stripUnknown: true })
@@ -135,7 +137,8 @@ class ValidationScheme {
     bookingAvailability = Joi.object().required().keys({
         roomId: validationUtility.id,
         dateStart: validationUtility.unixTimestamp,
-        dateEnd: validationUtility.unixTimestamp
+        dateEnd: validationUtility.unixTimestamp,
+        excludeBookingId: validationUtility.idOptional
     }).options({ stripUnknown: true })
 }
 

@@ -6,7 +6,7 @@ import {
     fetchBookingAdmDelete,
     BookingCreateParams,
     BookingUpdateParams
-} from '../../../../API/bookingAPI';
+} from '../../../../API/privateAPI';
 
 // Create booking
 export const bookingAdmCreate = async ({
@@ -57,7 +57,7 @@ export const bookingAdmCancel = async ({
 }) => {
     const toastId = toast.loading('Отмена бронирования...');
     try {
-        await fetchBookingAdmCancel(bookingId);
+        await fetchBookingAdmCancel({ bookingId });
         toast.success('Бронирование успешно отменено', { id: toastId });
         onSuccess && await onSuccess();
     } catch (e: any) {
@@ -76,7 +76,7 @@ export const bookingAdmDelete = async ({
 }) => {
     const toastId = toast.loading('Удаление бронирования...');
     try {
-        await fetchBookingAdmDelete(bookingId);
+        await fetchBookingAdmDelete({ bookingId });
         toast.success('Бронирование успешно удалено', { id: toastId });
         onSuccess && await onSuccess();
     } catch (e: any) {

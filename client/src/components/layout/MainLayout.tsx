@@ -121,11 +121,13 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
                                 fullWidth
                                 variant={isActive(item.href) ? 'flat' : 'light'}
                                 color={isActive(item.href) ? 'primary' : 'default'}
-                                className={`justify-start gap-3 h-12 ${sidebarCollapsed ? 'px-0 justify-center' : ''}`}
+                                className={`flex flex-row items-center justify-start gap-3 h-12 ${sidebarCollapsed ? 'px-0 justify-center' : 'px-4'}`}
                                 onPress={() => router.push(item.href)}
                             >
-                                {item.icon}
-                                {!sidebarCollapsed && <span>{item.label}</span>}
+                                <span className="flex items-center justify-center min-w-[20px]">
+                                    {item.icon}
+                                </span>
+                                {!sidebarCollapsed && <span className="font-medium text-small truncate ml-1">{item.label}</span>}
                             </Button>
                         </Tooltip>
                     ))}
@@ -143,12 +145,14 @@ const MainLayout = observer(({ children }: MainLayoutProps) => {
                             href="/about"
                             fullWidth
                             variant="light"
-                            className={`justify-start gap-3 h-12 ${sidebarCollapsed ? 'px-0 justify-center' : ''}`}
+                            className={`flex flex-row items-center justify-start gap-3 h-12 ${sidebarCollapsed ? 'px-0 justify-center' : 'px-4'}`}
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {!sidebarCollapsed && <span>Об авторе</span>}
+                            <span className="flex items-center justify-center min-w-[20px]">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </span>
+                            {!sidebarCollapsed && <span className="font-medium text-small truncate ml-1">Об авторе</span>}
                         </Button>
                     </Tooltip>
                 </div>

@@ -1,5 +1,5 @@
 import toast from 'react-hot-toast';
-import { fetchRoomAdmCreate, fetchRoomAdmUpdate, fetchRoomAdmDelete, RoomCreateParams, RoomUpdateParams } from '../../../../API/roomAPI';
+import { fetchRoomAdmCreate, fetchRoomAdmUpdate, fetchRoomAdmDelete, RoomCreateParams, RoomUpdateParams } from '../../../../API/privateAPI';
 
 // Create room
 export const roomAdmCreate = async ({
@@ -50,7 +50,7 @@ export const roomAdmDelete = async ({
 }) => {
     const toastId = toast.loading('Удаление номера...');
     try {
-        await fetchRoomAdmDelete(roomId);
+        await fetchRoomAdmDelete({ roomId });
         toast.success('Номер успешно удалён', { id: toastId });
         onSuccess && await onSuccess();
     } catch (e: any) {
