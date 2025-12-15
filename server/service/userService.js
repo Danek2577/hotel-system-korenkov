@@ -9,6 +9,31 @@ const httpError = require('../utils/httpError');
  */
 class UserService {
     /**
+     * Normalize email (trim + toLowerCase)
+     * @param {string} email
+     * @returns {string}
+     * @private
+     */
+    emailNormalize(email) {
+        return String(email).trim().toLowerCase();
+    }
+
+    /**
+     * Map Sequelize user instance to safe plain object
+     * @param {import('../models/UserModel').UserModel} user
+     * @returns {{id:number,email:string,name:string,role:'ADMIN'|'MANAGER'}}
+     * @private
+     */
+    userFormat(user) {
+        return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+        };
+    }
+
+    /**
      * Register new user
      * @param {string} email
      * @param {string} password
@@ -17,8 +42,10 @@ class UserService {
      * @returns {Promise<{token: string, user: Object}>}
      */
     async authRegister({email, password, name, role = 'MANAGER'}) {
+        const normalizedEmail = this.emailNormalize(email);
+
         const candidate = await UserModel.findOne({
-            where: {email},
+            where: {email: normalizedEmail},
             attributes: ['id']
         });
 
@@ -30,7 +57,7 @@ class UserService {
         const password_hash = await bcrypt.hash(password, 10);
 
         const user = await UserModel.create({
-            email,
+            email: normalizedEmail,
             password_hash,
             name,
             role,
@@ -41,12 +68,7 @@ class UserService {
 
         return {
             token,
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role
-            }
+            user: this.userFormat(user)
         };
     }
 
@@ -57,8 +79,10 @@ class UserService {
      * @returns {Promise<{token: string, user: Object}>}
      */
     async authLogin({email, password}) {
+        const normalizedEmail = this.emailNormalize(email);
+
         const user = await UserModel.findOne({
-            where: {email, date_delete: null}
+            where: {email: normalizedEmail, date_delete: null}
         });
 
         if (!user) {
@@ -74,12 +98,7 @@ class UserService {
 
         return {
             token,
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role
-            }
+            user: this.userFormat(user)
         };
     }
 
