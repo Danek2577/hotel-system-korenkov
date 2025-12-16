@@ -236,37 +236,9 @@ class RoomService {
                 throw new httpError(400, 'Невозможно удалить номер с активными бронированиями');
             }
 
-            const unixNow = Math.floor(Date.now() / 1000);
-            room.date_delete = unixNow;
+            room.date_delete = Math.floor(Date.now() / 1000);
             await room.save({ transaction });
         });
-    }
-
-    /**
-     * Check room availability for date range
-     * @param {number} roomId
-     * @param {number} dateStart
-     * @param {number} dateEnd
-     * @param {number} [excludeBookingId] - Exclude booking for updates
-     * @returns {Promise<boolean>}
-     */
-    async availabilityCheck({ roomId, dateStart, dateEnd, excludeBookingId = null }) {
-        const where = {
-            room_id: roomId,
-            status: 'CONFIRMED',
-            date_delete: null,
-            // Collision detection: (RequestStart < ExistingEnd) && (RequestEnd > ExistingStart)
-            date_start: { [Op.lt]: dateEnd },
-            date_end: { [Op.gt]: dateStart }
-        };
-
-        if (excludeBookingId) {
-            where.id = { [Op.ne]: excludeBookingId };
-        }
-
-        const conflictingBooking = await BookingModel.findOne({ where });
-
-        return !conflictingBooking;
     }
 }
 
