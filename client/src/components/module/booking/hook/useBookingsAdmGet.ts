@@ -24,3 +24,5 @@ const useBookingsAdmGet = (params?: BookingsAdmGetParams) => {
 };
 
 export default useBookingsAdmGet;
+
+

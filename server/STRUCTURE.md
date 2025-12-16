@@ -58,10 +58,10 @@
 **RoomController**:
 - `admCreate`: Принимает `req.body`, валидирует через `roomCreate`, вызывает `RoomService.admCreate`, возвращает ID созданного номера
 - `admUpdate`: Принимает `req.body` и `req.params.roomId`, валидирует через `roomUpdate`, вызывает `RoomService.admUpdate`, возвращает успешный результат
-- `admGet`: Принимает `req.query`, валидирует через `roomAdmGet`, вызывает `RoomService.admGet`, возвращает список номеров с пагинацией
+- `admGet`: Принимает `req.query` (query параметры: roomId, name, category, status, offset, limit, sort_by, order), валидирует через `roomAdmGet`, вызывает `RoomService.admGet`, возвращает список номеров с пагинацией
 - `admGetOne`: Принимает `req.params.roomId`, валидирует через `roomAdmGetOne`, вызывает `RoomService.admGetOne`, возвращает номер
 - `admDelete`: Принимает `req.params.roomId`, валидирует через `roomAdmGetOne`, вызывает `RoomService.admDelete`, возвращает успешный результат
-- `roomPublicGet`: Принимает `req.query` (offset, limit, category), вызывает `RoomService.roomPublicGet`, возвращает список опубликованных номеров
+- `roomPublicGet`: Принимает `req.query` (query параметры: offset, limit, category), вызывает `RoomService.roomPublicGet`, возвращает список опубликованных номеров
 - `roomPublicGetOne`: Принимает `req.params.roomId`, вызывает `RoomService.roomPublicGetOne`, возвращает опубликованный номер
 
 **BookingController**:

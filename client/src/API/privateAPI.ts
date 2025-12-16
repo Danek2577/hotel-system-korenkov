@@ -1,4 +1,4 @@
-import { $host, $authHost } from './index';
+import {$host, $authHost} from './index';
 
 // ==================== TYPES ====================
 
@@ -172,130 +172,138 @@ export interface DashboardStats {
 // ==================== ROOM ENDPOINTS ====================
 
 // Public endpoints
-export const fetchRoomsPublicGet = async ({ offset, limit, category }: { offset?: number; limit?: number; category?: string } = {}) => {
-    const { data } = await $host.get('/rooms', {
-        params: { offset, limit, category }
+export const fetchRoomsPublicGet = async ({offset, limit, category}: {
+    offset?: number;
+    limit?: number;
+    category?: string
+} = {}) => {
+    const {data} = await $host.get('/rooms', {
+        params: {offset, limit, category}
     });
     return data;
 };
 
-export const fetchRoomPublicGetOne = async ({ roomId }: { roomId: number }) => {
-    const { data } = await $host.get(`/rooms/${roomId}`);
+export const fetchRoomPublicGetOne = async ({roomId}: { roomId: number }) => {
+    const {data} = await $host.get(`/rooms/${roomId}`);
     return data;
 };
 
 // Admin endpoints
-export const fetchRoomsAdmGet = async ({
-    roomId,
-    name,
-    category,
-    status,
-    offset,
-    limit,
-    sort_by,
-    order
-}: RoomsAdmGetParams = {}) => {
-    const { data } = await $authHost.get('/rooms/adm/list', {
-        params: { roomId, name, category, status, offset, limit, sort_by, order }
+export const fetchRoomsAdmGet = async (
+    {
+        roomId, name, category, status, offset, limit, sort_by, order
+    }: RoomsAdmGetParams = {}) => {
+    const {data} = await $authHost.get('/rooms/adm/list', {
+        params: {roomId, name, category, status, offset, limit, sort_by, order}
     });
     return data;
 };
 
-export const fetchRoomAdmGetOne = async ({ roomId }: { roomId: number }) => {
-    const { data } = await $authHost.get(`/rooms/adm/${roomId}`);
+export const fetchRoomAdmGetOne = async ({roomId}: { roomId: number }) => {
+    const {data} = await $authHost.get(`/rooms/adm/${roomId}`);
     return data;
 };
 
-export const fetchRoomAdmCreate = async ({ name, category, price, capacity, status, blocks, is_published }: RoomCreateParams) => {
-    const { data } = await $authHost.post('/rooms/adm', {
+export const fetchRoomAdmCreate = async (
+    {
+        name, category, price, capacity, status, blocks, is_published
+    }: RoomCreateParams) => {
+    const {data} = await $authHost.post('/rooms/adm', {
         name, category, price, capacity, status, blocks, is_published
     });
     return data;
 };
 
-export const fetchRoomAdmUpdate = async ({ roomId, name, category, price, capacity, status, blocks, is_published }: RoomUpdateParams) => {
-    const { data } = await $authHost.put(`/rooms/adm/${roomId}`, {
+export const fetchRoomAdmUpdate = async (
+    {
+        roomId, name, category, price, capacity, status, blocks, is_published
+    }: RoomUpdateParams) => {
+    const {data} = await $authHost.put(`/rooms/adm/${roomId}`, {
         name, category, price, capacity, status, blocks, is_published
     });
     return data;
 };
 
-export const fetchRoomAdmDelete = async ({ roomId }: { roomId: number }) => {
-    const { data } = await $authHost.delete(`/rooms/adm/${roomId}`);
+export const fetchRoomAdmDelete = async ({roomId}: { roomId: number }) => {
+    const {data} = await $authHost.delete(`/rooms/adm/${roomId}`);
     return data;
 };
 
 // ==================== BOOKING ENDPOINTS ====================
 
 // Public endpoint
-export const fetchBookingAvailabilityGet = async ({ roomId, dateStart, dateEnd, excludeBookingId }: { roomId: number; dateStart: number; dateEnd: number; excludeBookingId?: number }) => {
-    const { data } = await $host.get('/bookings/availability', {
-        params: { roomId, dateStart, dateEnd, excludeBookingId }
+export const fetchBookingAvailabilityGet = async (
+    {
+        roomId, dateStart, dateEnd, excludeBookingId
+    }: {
+        roomId: number; dateStart: number; dateEnd: number; excludeBookingId?: number
+    }) => {
+    const {data} = await $host.get('/bookings/availability', {
+        params: {roomId, dateStart, dateEnd, excludeBookingId}
     });
     return data;
 };
 
 // Admin endpoints
-export const fetchBookingsAdmGet = async ({
-    bookingId,
-    roomId,
-    guest_name,
-    status,
-    date_from,
-    date_to,
-    active_at,
-    offset,
-    limit
-}: BookingsAdmGetParams = {}) => {
-    const { data } = await $authHost.get('/bookings/adm', {
-        params: { bookingId, roomId, guest_name, status, date_from, date_to, active_at, offset, limit }
+export const fetchBookingsAdmGet = async (
+    {
+        bookingId, roomId, guest_name, status, date_from, date_to, active_at, offset, limit
+    }: BookingsAdmGetParams = {}) => {
+    const {data} = await $authHost.get('/bookings/adm', {
+        params: {bookingId, roomId, guest_name, status, date_from, date_to, active_at, offset, limit}
     });
     return data;
 };
 
-export const fetchBookingAdmGetOne = async ({ bookingId }: { bookingId: number }) => {
-    const { data } = await $authHost.get(`/bookings/adm/${bookingId}`);
+export const fetchBookingAdmGetOne = async ({bookingId}: { bookingId: number }) => {
+    const {data} = await $authHost.get(`/bookings/adm/${bookingId}`);
     return data;
 };
 
-export const fetchBookingAdmCreate = async ({ roomId, guest_name, guest_phone, date_start, date_end }: BookingCreateParams) => {
-    const { data } = await $authHost.post('/bookings/adm', {
+export const fetchBookingAdmCreate = async (
+    {
+        roomId, guest_name, guest_phone, date_start, date_end
+    }: BookingCreateParams) => {
+    const {data} = await $authHost.post('/bookings/adm', {
         roomId, guest_name, guest_phone, date_start, date_end
     });
     return data;
 };
 
-export const fetchBookingAdmUpdate = async ({ bookingId, guest_name, guest_phone, date_start, date_end, status }: BookingUpdateParams) => {
-    const { data } = await $authHost.put(`/bookings/adm/${bookingId}`, {
+export const fetchBookingAdmUpdate = async (
+    {
+        bookingId, guest_name, guest_phone, date_start, date_end, status
+    }: BookingUpdateParams) => {
+    const {data} = await $authHost.put(`/bookings/adm/${bookingId}`, {
         guest_name, guest_phone, date_start, date_end, status
     });
     return data;
 };
 
-export const fetchBookingAdmCancel = async ({ bookingId }: { bookingId: number }) => {
-    const { data } = await $authHost.put(`/bookings/adm/${bookingId}/cancel`);
+export const fetchBookingAdmCancel = async ({bookingId}: { bookingId: number }) => {
+    const {data} = await $authHost.put(`/bookings/adm/${bookingId}/cancel`);
     return data;
 };
 
-export const fetchBookingAdmDelete = async ({ bookingId }: { bookingId: number }) => {
-    const { data } = await $authHost.delete(`/bookings/adm/${bookingId}`);
+export const fetchBookingAdmDelete = async ({bookingId}: { bookingId: number }) => {
+    const {data} = await $authHost.delete(`/bookings/adm/${bookingId}`);
     return data;
 };
 
 // ==================== AUTH ENDPOINTS ====================
 
-export const fetchAuthLogin = async ({ email, password }: LoginParams) => {
-    const { data } = await $host.post('/auth/login', { email, password });
+export const fetchAuthLogin = async ({email, password}: LoginParams) => {
+    const {data} = await $host.post('/auth/login', {email, password});
     return data;
 };
 
-export const fetchAuthRegister = async ({ email, password, name, role }: RegisterParams) => {
-    const { data } = await $host.post('/auth/register', { email, password, name, role });
+export const fetchAuthRegister = async ({email, password, name, role}: RegisterParams) => {
+    const {data} = await $host.post('/auth/register', {email, password, name, role});
     return data;
 };
 
 export const fetchAuthCheck = async () => {
-    const { data } = await $authHost.get('/auth/check');
+    const {data} = await $authHost.get('/auth/check');
     return data;
 };
 
@@ -322,9 +330,9 @@ export const fetchAdmDashboardStatsGet = async (): Promise<DashboardStats> => {
         return defaultVal;
     };
 
-    const roomsData = getData(roomsResult, { rooms: [] });
-    const bookingsData = getData(bookingsResult, { bookings: [] });
-    const usersData = getData(usersResult, { count: 0, users: [] });
+    const roomsData = getData(roomsResult, {rooms: []});
+    const bookingsData = getData(bookingsResult, {bookings: []});
+    const usersData = getData(usersResult, {count: 0, users: []});
 
     // Приводим данные к массивам
     const rooms = Array.isArray(roomsData)

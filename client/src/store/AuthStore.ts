@@ -34,14 +34,12 @@ class AuthStore {
         this.setUser(message.user);
         return message.user;
     }
-
     async register(params: RegisterParams) {
         const { message } = await fetchAuthRegister(params);
         localStorage.setItem('token', message.token);
         this.setUser(message.user);
         return message.user;
     }
-
     async checkAuth() {
         try {
             const token = localStorage.getItem('token');
@@ -64,15 +62,12 @@ class AuthStore {
         localStorage.removeItem('token');
         this.setUser(null);
     }
-
     get isAdmin() {
         return this.user?.role === 'ADMIN';
     }
-
     get isManager() {
         return this.user?.role === 'MANAGER';
     }
 }
-
 const Auth = new AuthStore();
 export default Auth;
